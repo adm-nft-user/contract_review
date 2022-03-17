@@ -1,0 +1,22 @@
+import TuneGO from "../../contracts/TuneGO.cdc"
+
+// This transaction creates a new item struct
+// and stores it in the smart contract
+
+transaction() {
+    prepare(acct: AuthAccount) {
+
+        // borrow a reference to the admin resource
+        let admin = acct.borrow<&TuneGO.Admin>(from: TuneGO.AdminStoragePath)
+            ?? panic("No admin resource in storage")
+        admin.createItem(metadata: {"Title":"Tical Universe","Description":"The first ever NFT from the Tical Universe introducing Method Man’s alter ego Hot Nickel and the Tical Universe logo. Own a piece of history, the future starts here.","Rarity":"Rare","Creator":"Tical Universe","Artist Credits":"Method Man, Joey Crespo, Alex Smetsky, Aleks Sinyuts","Media URL":"https://assets.tunegonft.com/mbox/ticaluniverse.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - EDM","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Young and Dumb. Produced and Written by: Britain Smith.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-edm.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Hip hop","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Don’t Fight The Flow. Performed by: Jro & ChrisGlove. Written by Chris B. Taylor, James A. Robinson. Produced by Chris “The Glove” Taylor for Triad Entertainment Group.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-hiphop.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Hippie","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: The Water’s Fine. Wendy Colonna.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-hippie.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Jazz","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Fast Forward. Performed by Jon Barnes, Alex Bailey & Zach Barnes. Produced by Jon Barnes, Alex Bailey & Zach Barnes.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-jazz.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Latin","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Obvio. Performed by: Bish, Micah Palace.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-latin.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Pop","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Say Oh. Performed by: Terry Dexter. Produced by “Peran Van Dijk” and “Rene Van Verseveld”.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-pop.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - R&B","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Say My Name. Performed by: Leone. Produced by: Gorden Campbell.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-r-b.mp4"})
+        admin.createItem(metadata: {"Title":"TuneKitty - Reggae","Description":"Deep in the clubs and streets of the metaverse TuneKitties prowl with the purrfect mix of sound and style. Limited edition NFTs by TuneGO.","Rarity":"Common","Creator":"TuneGO, Inc.","Music Credits":"Song Title: Go Away. Performed by: Brandon Stennett. Producer: Brandon Stennett & Pablo Stennett.","Media URL":"https://assets.tunegonft.com/mbox/tunekitty-reggae.mp4"})
+    }
+}

@@ -1,0 +1,19 @@
+import TicalUniverse from "../../contracts/TicalUniverse.cdc"
+
+// This transaction creates a new item struct
+// and stores it in the smart contract
+
+transaction() {
+    prepare(acct: AuthAccount) {
+
+        // borrow a reference to the admin resource
+        let admin = acct.borrow<&TicalUniverse.Admin>(from: TicalUniverse.AdminStoragePath)
+            ?? panic("No admin resource in storage")
+
+        admin.createItem(metadata: {"Title":"Golden Boy","Description":"Golden Boy is a gold plated robot that has the ability to transform into any weapon Hot Nikkel needs to ensure victory during their journey into the dark universe. As their journey continues, Golden Boy will reveal the true extent of its powers during each battle. Whenever the duo defeats an enemy, Golden boy adds the gem dropped by the demon into its CPU in order to teleport the duo into the next realm.","Asset":"https://assets.tunegonft.com/tical/ooboequiu4xahChei1Aechiel3chiHuaracheevei7heeXaBool6XeePee2t1.mp4","Rarity":"Rare","Creator":"Tical Universe","Credits":"Method Man, Alex Smetsky, Aleks Sinyuts and Joey Crespo"})
+        admin.createItem(metadata: {"Title":"Wrath","Description":"Wrath is a creature of rage and brute strength. It stands 5 stories tall and is a walking wrecking ball. With its spiked knuckles, it breaks through anything and everything that gets in its way. Never defeated, it can turn a mountain into a sand dune with one swing of its fist. How will Hot Nikkel and Golden Boy be able to defeat such a monstrosity?!","Asset":"https://assets.tunegonft.com/tical/yaeh3ohfa4aa5ohr1eeli7Iad0iingiem1Ocoh9OeSh6arah4Foh0zahth0p2.mp4","Rarity":"Rare","Creator":"Tical Universe","Credits":"Method Man, Alex Smetsky, Aleks Sinyuts and Joey Crespo"})
+        admin.createItem(metadata: {"Title":"Abomination","Description":"A towering robot leach that has the ability to absorb anything in its sight, Abomination was created for the sole purpose of destruction. It has 3 rows of teeth that spin in opposite directions and absorbs anything that comes near it. Abomination dwells in the deepest chamber of the dark universe and acts as the symbol for Gluttony. As the first enemy Hot Nikkel and Golden Boy encounter, we shall see what horrors await the duo on their journey.","Asset":"https://assets.tunegonft.com/tical/ohj3iv1Awiewiezei7Euje5airaiB1ahngooZ8izee1cieC6gei3eeshahze3.mp4","Rarity":"Rare","Creator":"Tical Universe","Credits":"Method Man, Alex Smetsky, Aleks Sinyuts and Joey Crespo"})
+        admin.createItem(metadata: {"Title":"Cratter","Description":"The beast that appears cute but transforms into its opponent’s darkest fears, Cratter is the symbol of Greed and demonstrates its power by stealing anything it wants from its opponents. It can turn into anything and mimics its opponent’s abilities and strength. Its abilities are limitless and can fuse into anything your mind can imagine.","Asset":"https://assets.tunegonft.com/tical/Fie7wahsh8FeN7aipie8uineip7Ahna4eetahph3phur4oosh4ito1daeche4.mp4","Rarity":"Rare","Creator":"Tical Universe","Credits":"Method Man, Alex Smetsky, Aleks Sinyuts and Joey Crespo"})
+        admin.createItem(metadata: {"Title":"Hot Nikkel","Description":"Hot Nikkel is a fighting legend that is chosen to go into the dark universe to fight the demons that threaten the world. He is a martial arts expert who possesses a variety of secret abilities. Many of his attacks summon entities by using supernatural powers, which assist him with victory over each demon he faces.","Asset":"https://assets.tunegonft.com/tical/mae9Joob4ieghieyoo6chooSohvod7iekah7eyainefe2iQu4iugeeSuvoop5.mp4","Rarity":"Legendary","Creator":"Tical Universe","Credits":"Method Man, Alex Smetsky, Aleks Sinyuts and Joey Crespo"})
+    }
+}

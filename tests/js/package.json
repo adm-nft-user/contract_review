@@ -1,0 +1,23 @@
+{
+  "name": "tunego-marketplace-cadence-testing",
+  "version": "0.0.1",
+  "description": "Tunego Marketplace contracts tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --runInBand",
+    "test:debug": "node --inspect --trace-warnings node_modules/.bin/jest --runInBand --testTimeout=600000"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.0",
+    "@onflow/types": "^0.0.4",
+    "@types/faker": "^5.1.0",
+    "@types/jest": "^27.0.0",
+    "babel-jest": "^27.0.0",
+    "faker": "^5.1.0",
+    "flow-js-testing": "^0.2.3-alpha.3",
+    "jest": "^27.0.0",
+    "prettier": "^2.3.0",
+    "ts-jest": "^27.0.0"
+  }
+}
