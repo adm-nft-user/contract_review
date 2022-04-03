@@ -1,15 +1,14 @@
-import { Address, UInt32, UInt64, String } from '@onflow/types';
+import { Address, UInt32, UInt64 } from '@onflow/types';
 import {
   executeScript,
   sendTransaction,
   getContractAddress,
-  getContractCode,
   getScriptCode,
   getTransactionCode,
   mintFlow,
   deployContractByName,
 } from 'flow-js-testing';
-import { getTunegoAddress, registerContract } from './common';
+import { getTuneGOAddress } from './common';
 
 /*
  * Deploys NonFungibleToken and TicalUniverse contracts.
@@ -17,34 +16,17 @@ import { getTunegoAddress, registerContract } from './common';
  * @returns {Promise<*>}
  * */
 export const deployTicalUniverse = async () => {
-  const Tunego = await getTunegoAddress();
-  const addressMap = { NonFungibleToken: Tunego };
-  await mintFlow(Tunego, '10.0');
+  const TuneGO = await getTuneGOAddress();
+  await mintFlow(TuneGO, '10.0');
 
   await deployContractByName({
-    to: Tunego,
+    to: TuneGO,
     name: 'NonFungibleToken',
   });
-
-  const contractName = 'TicalUniverse';
-  const contractCode = await getContractCode({
-    name: contractName,
-    addressMap,
+  return deployContractByName({
+    to: TuneGO,
+    name: 'TicalUniverse',
   });
-  const contractCodeHex = Buffer.from(contractCode).toString('hex');
-
-  const code = await getTransactionCode({
-    name: 'ticalUniverse/deploy_contract',
-  });
-  const signers = [Tunego];
-
-  const args = [
-    [contractName, String],
-    [contractCodeHex, String],
-  ];
-
-  await registerContract(contractName, Tunego);
-  return sendTransaction({ code, signers, args });
 };
 
 /*
@@ -67,7 +49,7 @@ export const setupTicalUniverseOnAccount = async (account) => {
  * @returns Promise{UInt64} - number of NFT minted so far
  * */
 export const getTicalUniverseSupply = async () => {
-  const TicalUniverse = await getTunegoAddress();
+  const TicalUniverse = await getTuneGOAddress();
 
   const addressMap = { TicalUniverse };
   const name = 'ticalUniverse/read_tical_universe_supply';
@@ -82,8 +64,8 @@ export const getTicalUniverseSupply = async () => {
  * @returns {Promise<*>}
  * */
 export const setupTicalUniverseItems = async () => {
-  const NonFungibleToken = await getTunegoAddress();
-  const TicalUniverse = await getTunegoAddress();
+  const NonFungibleToken = await getTuneGOAddress();
+  const TicalUniverse = await getTuneGOAddress();
   const addressMap = { NonFungibleToken, TicalUniverse };
 
   const startNewSeries = 'ticalUniverse/start_new_series';
@@ -117,8 +99,8 @@ export const setupTicalUniverseItems = async () => {
 export const mintTicalUniverse = async (recipient, quantity = 1) => {
   await setupTicalUniverseOnAccount(recipient);
 
-  const TicalUniverse = await getTunegoAddress();
-  const NonFungibleToken = await getTunegoAddress();
+  const TicalUniverse = await getTuneGOAddress();
+  const NonFungibleToken = await getTuneGOAddress();
 
   const name = 'ticalUniverse/mint_collectibles';
   const addressMap = { NonFungibleToken, TicalUniverse };
@@ -150,8 +132,8 @@ export const transferTicalUniverse = async (
   recipient,
   collectibleId,
 ) => {
-  const NonFungibleToken = await getTunegoAddress();
-  const TicalUniverse = await getTunegoAddress();
+  const NonFungibleToken = await getTuneGOAddress();
+  const TicalUniverse = await getTuneGOAddress();
 
   const name = 'ticalUniverse/transfer_collectible';
   const addressMap = { NonFungibleToken, TicalUniverse };
@@ -172,8 +154,8 @@ export const transferTicalUniverse = async (
  * @returns {Promise<TicalUniverse>}
  * */
 export const getTicalUniverseById = async (account, id) => {
-  const TicalUniverse = await getTunegoAddress();
-  const NonFungibleToken = await getTunegoAddress();
+  const TicalUniverse = await getTuneGOAddress();
+  const NonFungibleToken = await getTuneGOAddress();
 
   const name = 'ticalUniverse/read_tical_universe';
   const addressMap = { TicalUniverse, NonFungibleToken };
@@ -193,7 +175,7 @@ export const getTicalUniverseById = async (account, id) => {
  * @returns {Promise<UInt64>}
  * */
 export const getTicalUniverseCollectionLength = async (account) => {
-  const TicalUniverse = await getTunegoAddress();
+  const TicalUniverse = await getTuneGOAddress();
   const NonFungibleToken = await getContractAddress('NonFungibleToken');
 
   const name = 'ticalUniverse/read_collection_length';

@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
-import TunegoNfts from "../../contracts/TunegoNfts.cdc"
+import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 
-// This transaction transfers a Tunego Nft from one account to another.
+// This transaction transfers a TuneGO NFT from one account to another.
 
 transaction(recipient: Address, withdrawID: UInt64) {
     prepare(signer: AuthAccount) {
@@ -10,11 +10,11 @@ transaction(recipient: Address, withdrawID: UInt64) {
         let recipient = getAccount(recipient)
 
         // borrow a reference to the signer's NFT collection
-        let collectionRef = signer.borrow<&TunegoNfts.Collection>(from: TunegoNfts.CollectionStoragePath)
+        let collectionRef = signer.borrow<&TuneGONFT.Collection>(from: TuneGONFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipient.getCapability(TunegoNfts.CollectionPublicPath)!.borrow<&{NonFungibleToken.CollectionPublic}>()!
+        let depositRef = recipient.getCapability(TuneGONFT.CollectionPublicPath)!.borrow<&{NonFungibleToken.CollectionPublic}>()!
 
         // withdraw the NFT from the owner's collection
         let nft <- collectionRef.withdraw(withdrawID: withdrawID)

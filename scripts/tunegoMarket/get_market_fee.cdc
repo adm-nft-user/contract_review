@@ -1,6 +1,6 @@
-import TunegoMarket from "../../contracts/TunegoMarket.cdc"
+import TuneGOMarket from "../../contracts/TuneGOMarket.cdc"
 
-pub fun main(): TunegoMarket.MarketFee {
+pub fun main(): TuneGOMarket.MarketFee {
 
-    return TunegoMarket.getMarketFee()
+    return TuneGOMarket.getMarketFee()
 }

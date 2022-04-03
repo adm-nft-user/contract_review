@@ -1,7 +1,7 @@
 {
   "name": "tunego-marketplace-cadence-testing",
   "version": "0.0.1",
-  "description": "Tunego Marketplace contracts tests",
+  "description": "TuneGO Marketplace contracts tests",
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand",

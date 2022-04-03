@@ -1,17 +1,17 @@
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 import MetadataViews from "../../contracts/MetadataViews.cdc"
-import TunegoNfts from "../../contracts/TunegoNfts.cdc"
+import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 
-pub struct NftViews {
-    pub let metadata: TunegoNfts.Metadata
-    pub let edition: TunegoNfts.Edition
-    pub let royalties: [TunegoNfts.Royalty]
+pub struct NFTViews {
+    pub let metadata: TuneGONFT.Metadata
+    pub let edition: TuneGONFT.Edition
+    pub let royalties: [TuneGONFT.Royalty]
     pub let display: MetadataViews.Display
 
     init(
-        metadata: TunegoNfts.Metadata,
-        edition: TunegoNfts.Edition,
-        royalties: [TunegoNfts.Royalty],
+        metadata: TuneGONFT.Metadata,
+        edition: TuneGONFT.Edition,
+        royalties: [TuneGONFT.Royalty],
         display: MetadataViews.Display,
     ) {
         self.metadata = metadata
@@ -21,27 +21,27 @@ pub struct NftViews {
     }
 }
 
-pub fun main(address: Address, collectibleID: UInt64): NftViews {
+pub fun main(address: Address, collectibleID: UInt64): NFTViews {
 
     let owner = getAccount(address)
-    let collectionBorrow = owner.getCapability(TunegoNfts.CollectionPublicPath)!
-        .borrow<&{TunegoNfts.TunegoNftsCollectionPublic}>()
-        ?? panic("Could not borrow TunegoNftsCollectionPublic")
+    let collectionBorrow = owner.getCapability(TuneGONFT.CollectionPublicPath)!
+        .borrow<&{TuneGONFT.TuneGONFTCollectionPublic}>()
+        ?? panic("Could not borrow TuneGONFTCollectionPublic")
 
-    let tunegoNft = collectionBorrow.borrowTunegoNft(id: collectibleID)
+    let tunegoNFT = collectionBorrow.borrowTuneGONFT(id: collectibleID)
         ?? panic("No such collectibleID in that collection")
 
-    let metadataView = tunegoNft.resolveView(Type<TunegoNfts.Metadata>())!
-    let editionView = tunegoNft.resolveView(Type<TunegoNfts.Edition>())!
-    let royaltiesView = tunegoNft.resolveView(Type<[TunegoNfts.Royalty]>())!
-    let displayView = tunegoNft.resolveView(Type<MetadataViews.Display>())!
+    let metadataView = tunegoNFT.resolveView(Type<TuneGONFT.Metadata>())!
+    let editionView = tunegoNFT.resolveView(Type<TuneGONFT.Edition>())!
+    let royaltiesView = tunegoNFT.resolveView(Type<[TuneGONFT.Royalty]>())!
+    let displayView = tunegoNFT.resolveView(Type<MetadataViews.Display>())!
 
-    let metadata = metadataView as! TunegoNfts.Metadata
-    let edition = editionView as! TunegoNfts.Edition
-    let royalties = royaltiesView as! [TunegoNfts.Royalty]
+    let metadata = metadataView as! TuneGONFT.Metadata
+    let edition = editionView as! TuneGONFT.Edition
+    let royalties = royaltiesView as! [TuneGONFT.Royalty]
     let display = displayView as! MetadataViews.Display
 
-    return NftViews(
+    return NFTViews(
         metadata: metadata,
         edition: edition,
         royalties: royalties,

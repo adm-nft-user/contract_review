@@ -1,24 +1,12 @@
 import FungibleToken from "../../contracts/FungibleToken.cdc"
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 import FlowToken from "../../contracts/FlowToken.cdc"
-import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 import TuneGO from "../../contracts/TuneGO.cdc"
 import TicalUniverse from "../../contracts/TicalUniverse.cdc"
 import TuneGOMarket from "../../contracts/TuneGOMarket.cdc"
 
 pub fun getOrCreateNFTCollectionRef(account: AuthAccount, contractName: String): &{NonFungibleToken.Receiver} {
     switch contractName {
-        case "TuneGONFT":
-            if let existingCollectionRef = account.borrow<&TuneGONFT.Collection>(from: TuneGONFT.CollectionStoragePath) {
-                return existingCollectionRef
-            }
-            let collection <- TuneGONFT.createEmptyCollection() as! @TuneGONFT.Collection
-            let collectionRef = &collection as &TuneGONFT.Collection
-    
-            account.save(<-collection, to: TuneGONFT.CollectionStoragePath)
-            account.link<&TuneGONFT.Collection{NonFungibleToken.CollectionPublic, TuneGONFT.TuneGONFTCollectionPublic}>(TuneGONFT.CollectionPublicPath, target: TuneGONFT.CollectionStoragePath)
-
-            return collectionRef
         case "TuneGO":
             if let existingCollectionRef = account.borrow<&TuneGO.Collection>(from: TuneGO.CollectionStoragePath) {
                 return existingCollectionRef
@@ -47,8 +35,6 @@ pub fun getOrCreateNFTCollectionRef(account: AuthAccount, contractName: String):
 
 pub fun getNFTCollectionCapability(account: AuthAccount, contractName: String): Capability<&{NonFungibleToken.Receiver}> {
     switch contractName {
-        case "TuneGONFT":
-            return  account.getCapability<&TuneGONFT.Collection{NonFungibleToken.Receiver}>(TuneGONFT.CollectionPublicPath)
         case "TuneGO":
             return  account.getCapability<&TuneGO.Collection{NonFungibleToken.Receiver}>(TuneGO.CollectionPublicPath)
         case "TicalUniverse":
@@ -66,7 +52,7 @@ transaction(collectibleContractName: String, saleOfferId: UInt64, marketCollecti
 
     prepare(signer: AuthAccount) {
 
-        assert(["TuneGONFT", "TuneGO", "TicalUniverse"].contains(collectibleContractName), message: "Contract not supported")
+        assert(["TuneGO", "TicalUniverse"].contains(collectibleContractName), message: "Contract not supported")
 
         let marketCollection = getAccount(marketCollectionAddress)
             .getCapability<&TuneGOMarket.Collection{TuneGOMarket.CollectionPublic}>(
