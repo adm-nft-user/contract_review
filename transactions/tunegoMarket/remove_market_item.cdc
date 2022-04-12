@@ -1,11 +1,11 @@
-import TunegoMarket from "../../contracts/TunegoMarket.cdc"
+import TuneGOMarket from "../../contracts/TuneGOMarket.cdc"
 
 transaction(saleOfferId: UInt64) {
-    let marketCollection: &TunegoMarket.Collection
+    let marketCollection: &TuneGOMarket.Collection
 
     prepare(signer: AuthAccount) {
-        self.marketCollection = signer.borrow<&TunegoMarket.Collection>(from: TunegoMarket.CollectionStoragePath)
-            ?? panic("Missing TunegoMarket Collection")
+        self.marketCollection = signer.borrow<&TuneGOMarket.Collection>(from: TuneGOMarket.CollectionStoragePath)
+            ?? panic("Missing TuneGOMarket Collection")
     }
 
     execute {

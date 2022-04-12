@@ -13,8 +13,8 @@ pub fun main(address: Address, collectibleId: UInt64): &TuneGO.NFT {
         ?? panic("Could not borrow capability from public collection")
 
     // borrow a reference to a specific NFT in the collection
-    let tuneGO = collectionBorrow.borrowCollectible(id: collectibleId)
+    let tunego = collectionBorrow.borrowCollectible(id: collectibleId)
         ?? panic("No such collectibleId in that collection")
 
-    return tuneGO
+    return tunego
 }

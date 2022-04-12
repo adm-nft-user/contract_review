@@ -1,17 +1,12 @@
-import NonFungibleToken from "./NonFungibleToken.cdc"
-import FungibleToken from "./FungibleToken.cdc"
-import FlowToken from "./FlowToken.cdc"
-import TicalUniverse from "./TicalUniverse.cdc"
-import TuneGO from "./TuneGO.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448
+import FungibleToken from 0xf233dcee88fe0abe
+import FlowToken from 0x1654653399040a61
+import TicalUniverse from 0xfef48806337aabf1
+import TuneGO from 0x0d9bc5af3fc0c2e3
 
-/*
-    This is TunegoMarket initial contract.
-
-    It allows:
-    - to create Sale Offers and place them in a collection, making it publicly accessible
-    - to accept the offer and buy the item
- */
-pub contract TunegoMarket {
+// Contract
+//
+pub contract TuneGOMarket {
 
     // Events
     //
@@ -26,7 +21,7 @@ pub contract TunegoMarket {
     )
     pub event SaleOfferAccepted(saleOfferId: UInt64, buyer: Address)
     pub event SaleOfferRemoved(saleOfferId: UInt64)
-    pub event TunegoMarketFeeSet(receiver: Address, percentage: UFix64)
+    pub event TuneGOMarketFeeSet(receiver: Address, percentage: UFix64)
 
     // Paths
     //
@@ -61,8 +56,8 @@ pub contract TunegoMarket {
 
     // Market config
     //
-    access(contract) var TunegoFee: MarketFee
-    access(contract) let SupportedNftTypes: [Type]
+    access(contract) var TuneGOFee: MarketFee
+    access(contract) let SupportedNFTTypes: [Type]
 
     // SaleOfferPublic
     //
@@ -70,7 +65,6 @@ pub contract TunegoMarket {
         pub let collectibleId: UInt64
         pub let collectibleType: Type
         pub let price: UFix64
-        pub let royalties: [Royalty]
         pub var isCompleted: Bool
 
         pub fun borrowCollectible(): &NonFungibleToken.NFT
@@ -83,13 +77,13 @@ pub contract TunegoMarket {
     // SaleOffer
     //
     access(all) resource SaleOffer: SaleOfferPublic {
+        pub var isCompleted: Bool
         pub let collectibleId: UInt64
         pub let collectibleType: Type 
         pub let price: UFix64
-        pub let paymentReceiver: Capability<&FlowToken.Vault{FungibleToken.Receiver}>
-        pub let royalties: [Royalty]
-        pub var isCompleted: Bool
 
+        access(self) let paymentReceiver: Capability<&FlowToken.Vault{FungibleToken.Receiver}>
+        access(self) let royalties: [Royalty]
         access(self) let saleItemProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
         access(self) let tunegoPaymentFeeReceiver: Capability<&{FungibleToken.Receiver}>
         access(self) let tunegoPaymentFeePercentage: UFix64
@@ -152,7 +146,7 @@ pub contract TunegoMarket {
             let collectible = saleItemProvider!.borrowNFT(id: collectibleId)
             assert(collectible.isInstance(collectibleType), message: "Collectible is not of specified type")
             assert(collectible.id == collectibleId, message: "Collectible does not have specified ID")
-            assert(TunegoMarket.SupportedNftTypes.contains(collectible.getType()), message: "Collectible is not of supported type")
+            assert(TuneGOMarket.SupportedNFTTypes.contains(collectible.getType()), message: "Collectible is not of supported type")
             assert(paymentReceiver.borrow() != nil, message: "Missing payment receiver vault")
 
             var totalRoyaltiesPercentage: UFix64 = 0.0
@@ -163,7 +157,7 @@ pub contract TunegoMarket {
 
                 totalRoyaltiesPercentage = totalRoyaltiesPercentage + royalty.percentage;
             }
-            let totalFeesPercentage = totalRoyaltiesPercentage + TunegoMarket.TunegoFee.percentage;
+            let totalFeesPercentage = totalRoyaltiesPercentage + TuneGOMarket.TuneGOFee.percentage;
             assert(totalFeesPercentage < 100.0, message: "Total fees percentage is too high")
 
             self.isCompleted = false
@@ -174,9 +168,9 @@ pub contract TunegoMarket {
             self.price = price
             self.paymentReceiver = paymentReceiver
 
-            let tunegoAccount = getAccount(TunegoMarket.TunegoFee.receiver)
+            let tunegoAccount = getAccount(TuneGOMarket.TuneGOFee.receiver)
             self.tunegoPaymentFeeReceiver = tunegoAccount.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-            self.tunegoPaymentFeePercentage = TunegoMarket.TunegoFee.percentage
+            self.tunegoPaymentFeePercentage = TuneGOMarket.TuneGOFee.percentage
         }
     }
 
@@ -231,7 +225,7 @@ pub contract TunegoMarket {
                 saleOfferId: saleOfferId,
                 collectibleId: collectibleId,
                 collectibleType: collectibleType.identifier,
-                tunegoFee: TunegoMarket.TunegoFee,
+                tunegoFee: TuneGOMarket.TuneGOFee,
                 royalties: royalties,
                 price: price,
             )
@@ -275,20 +269,20 @@ pub contract TunegoMarket {
 
     pub fun getMarketFee(): MarketFee {
         return MarketFee(
-            receiver: self.TunegoFee.receiver,
-            percentage: self.TunegoFee.percentage
+            receiver: self.TuneGOFee.receiver,
+            percentage: self.TuneGOFee.percentage
         )
     }
 
     pub resource Admin {
 
-        pub fun setTunegoFee(tunegoFee: MarketFee) {
-            TunegoMarket.TunegoFee = tunegoFee
-            emit TunegoMarketFeeSet(receiver: tunegoFee.receiver, percentage: tunegoFee.percentage)
+        pub fun setTuneGOFee(tunegoFee: MarketFee) {
+            TuneGOMarket.TuneGOFee = tunegoFee
+            emit TuneGOMarketFeeSet(receiver: tunegoFee.receiver, percentage: tunegoFee.percentage)
         }
 
-        pub fun addSupportedNftType(nftType: Type) {
-            TunegoMarket.SupportedNftTypes.append(nftType)
+        pub fun addSupportedNFTType(nftType: Type) {
+            TuneGOMarket.SupportedNFTTypes.append(nftType)
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -297,20 +291,20 @@ pub contract TunegoMarket {
     }
 
     init () {
-        self.CollectionPublicPath = /public/tunegoMarketCollection002
-        self.CollectionStoragePath = /storage/tunegoMarketCollection002
-        self.AdminPublicPath = /public/tunegoMarketAdmin002
-        self.AdminStoragePath = /storage/tunegoMarketAdmin002
+        self.CollectionPublicPath = /public/tunegoMarketCollection
+        self.CollectionStoragePath = /storage/tunegoMarketCollection
+        self.AdminPublicPath = /public/tunegoMarketAdmin
+        self.AdminStoragePath = /storage/tunegoMarketAdmin
 
-        self.account.save<@Admin>(<- create Admin(), to: TunegoMarket.AdminStoragePath)
-        self.SupportedNftTypes = [ Type<@TuneGO.NFT>(), Type<@TicalUniverse.NFT>() ]
+        self.account.save<@Admin>(<- create Admin(), to: TuneGOMarket.AdminStoragePath)
+        self.SupportedNFTTypes = [ Type<@TuneGO.NFT>(), Type<@TicalUniverse.NFT>() ]
 
         let initialMarketFee = MarketFee(
             receiver: self.account.address,
             percentage: UFix64(2.5)
         )
-        self.TunegoFee = initialMarketFee
-        emit TunegoMarketFeeSet(receiver: initialMarketFee.receiver, percentage: initialMarketFee.percentage)
+        self.TuneGOFee = initialMarketFee
+        emit TuneGOMarketFeeSet(receiver: initialMarketFee.receiver, percentage: initialMarketFee.percentage)
 
         emit ContractInitialized()
     }
