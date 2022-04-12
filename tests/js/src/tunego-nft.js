@@ -1,69 +1,47 @@
-import { Address, UInt64, UFix64, String, Dictionary } from '@onflow/types';
+import { Address, UInt64, UFix64, String, Dictionary } from "@onflow/types";
 import {
   deployContractByName,
   executeScript,
   getContractAddress,
-  getContractCode,
   getScriptCode,
   getTransactionCode,
   mintFlow,
   sendTransaction,
-} from 'flow-js-testing';
+} from "flow-js-testing";
 import {
-  getTunegoAddress,
-  getTunegoAdminAddress,
+  getTuneGOAddress,
+  getTuneGOAdminAddress,
   getFungibleTokenAddress,
   getFlowTokenAddress,
-  registerContract,
   toUFix64,
-} from './common';
-import * as faker from 'faker';
+} from "./common";
+import * as faker from "faker";
 
 /*
- * Deploys NonFungibleToken and TunegoNfts contracts.
+ * Deploys NonFungibleToken and TuneGONFT contracts.
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
-export const deployTunegoNfts = async () => {
-  const Tunego = await getTunegoAddress();
-  const addressMap = {
-    FungibleToken: getFungibleTokenAddress(),
-    FlowToken: getFlowTokenAddress(),
-    NonFungibleToken: Tunego,
-    MetadataViews: Tunego,
-  };
+export const deployTuneGONFT = async () => {
+  const TuneGO = await getTuneGOAddress();
 
-  await mintFlow(Tunego, '10.0');
+  await mintFlow(TuneGO, "10.0");
   await deployContractByName({
-    to: Tunego,
-    name: 'FungibleToken',
+    to: TuneGO,
+    name: "FungibleToken",
   });
   await deployContractByName({
-    to: Tunego,
-    name: 'NonFungibleToken',
+    to: TuneGO,
+    name: "NonFungibleToken",
   });
   await deployContractByName({
-    to: Tunego,
-    name: 'MetadataViews',
+    to: TuneGO,
+    name: "MetadataViews",
   });
-
-  const contractName = 'TunegoNfts';
-  const contractCode = await getContractCode({
-    name: contractName,
-    addressMap,
+  return deployContractByName({
+    to: TuneGO,
+    name: "TuneGONFT",
   });
-  const contractCodeHex = Buffer.from(contractCode).toString('hex');
-
-  const code = await getTransactionCode({ name: 'tunegoNft/deploy_contract' });
-  const signers = [Tunego];
-
-  const args = [
-    [contractName, String],
-    [contractCodeHex, String],
-  ];
-
-  await registerContract(contractName, Tunego);
-  return sendTransaction({ code, signers, args });
 };
 
 /*
@@ -74,10 +52,10 @@ export const deployTunegoNfts = async () => {
  * @returns {Promise<*>}
  * */
 export const createNFTMinter = async (admin, newAdmin) => {
-  const TunegoNfts = await getTunegoAddress();
+  const TuneGONFT = await getTuneGOAddress();
 
-  const name = 'tunegoNft/create_nft_minter';
-  const addressMap = { TunegoNfts };
+  const name = "tunegoNFT/create_nft_minter";
+  const addressMap = { TuneGONFT };
   const code = await getTransactionCode({ name, addressMap });
 
   const signers = [admin, newAdmin];
@@ -94,10 +72,10 @@ export const createNFTMinter = async (admin, newAdmin) => {
  * @returns {Promise<*>}
  * */
 export const transferNFTMinter = async (admin, newAdmin) => {
-  const TunegoNfts = await getTunegoAddress();
+  const TuneGONFT = await getTuneGOAddress();
 
-  const name = 'tunegoNft/transfer_nft_minter';
-  const addressMap = { TunegoNfts };
+  const name = "tunegoNFT/transfer_nft_minter";
+  const addressMap = { TuneGONFT };
   const code = await getTransactionCode({ name, addressMap });
 
   const signers = [admin, newAdmin];
@@ -107,13 +85,13 @@ export const transferNFTMinter = async (admin, newAdmin) => {
 };
 
 /*
- * Setups TunegoNfts collection on account and exposes public capability.
+ * Setups TuneGONFT collection on account and exposes public capability.
  * @param {string} account - account address
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
-export const setupTunegoNftsOnAccount = async (account) => {
-  const name = 'tunegoNft/setup_account';
+export const setupTuneGONFTOnAccount = async (account) => {
+  const name = "tunegoNFT/setup_account";
   const code = await getTransactionCode({ name });
   const signers = [account];
 
@@ -121,22 +99,22 @@ export const setupTunegoNftsOnAccount = async (account) => {
 };
 
 /*
- * Returns TunegoNfts supply.
+ * Returns TuneGONFT supply.
  * @throws Will throw an error if execution fails
  * @returns Promise{UInt64} - number of NFT minted so far
  * */
-export const getTunegoNftSupply = async () => {
-  const TunegoNfts = await getTunegoAddress();
+export const getTuneGONFTSupply = async () => {
+  const TuneGONFT = await getTuneGOAddress();
 
-  const addressMap = { TunegoNfts };
-  const name = 'tunegoNft/read_tunego_nfts_supply';
+  const addressMap = { TuneGONFT };
+  const name = "tunegoNFT/read_tunego_nfts_supply";
   const code = await getScriptCode({ name, addressMap });
 
   return executeScript({ code });
 };
 
 /*
- * Mints TunegoNft and sends it to **recipient**.
+ * Mints TuneGONFT and sends it to **recipient**.
  * @param {string} recipient - account address
  * @param {string} itemId - nft itemId
  * @param {string} collectionId - nft collectionId
@@ -148,7 +126,7 @@ export const getTunegoNftSupply = async () => {
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const mintTunegoNfts = async (
+export const mintTuneGONFT = async (
   recipient,
   itemId,
   collectionId,
@@ -156,19 +134,19 @@ export const mintTunegoNfts = async (
   metadata,
   royalties = [],
   additionalInfo = {},
-  minter = null,
+  minter = null
 ) => {
-  const TunegoAdmin = minter || (await getTunegoAdminAddress());
-  const NonFungibleToken = await getTunegoAddress();
-  const TunegoNfts = await getTunegoAddress();
+  const TuneGOAdmin = minter || (await getTuneGOAdminAddress());
+  const NonFungibleToken = await getTuneGOAddress();
+  const TuneGONFT = await getTuneGOAddress();
   const FungibleToken = getFungibleTokenAddress();
   const FlowToken = getFlowTokenAddress();
 
-  const name = 'tunegoNft/mint_tunego_nfts';
-  const addressMap = { NonFungibleToken, TunegoNfts, FungibleToken, FlowToken };
+  const name = "tunegoNFT/mint_tunego_nfts";
+  const addressMap = { NonFungibleToken, TuneGONFT, FungibleToken, FlowToken };
   const code = await getTransactionCode({ name, addressMap });
 
-  const signers = [TunegoAdmin];
+  const signers = [TuneGOAdmin];
   const args = [
     [recipient, Address],
     [itemId, String],
@@ -198,7 +176,7 @@ export const mintTunegoNfts = async (
 };
 
 /*
- * Mints random TunegoNft and sends it to **recipient**.
+ * Mints random TuneGONFT and sends it to **recipient**.
  * @param {string} recipient - account address
  * @param {number} quantity - nfts quantity
  * @param {object} data - nft data
@@ -206,19 +184,19 @@ export const mintTunegoNfts = async (
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const mintRandomTunegoNfts = async (
+export const mintRandomTuneGONFT = async (
   recipient,
   quantity = 1,
   data = {},
-  minter = null,
+  minter = null
 ) => {
-  await setupTunegoNftsOnAccount(recipient);
+  await setupTuneGONFTOnAccount(recipient);
 
   const itemId = data.itemId || faker.datatype.uuid();
   const collectionId = data.collectionId || faker.datatype.uuid();
   const metadata = getRandomMetadata();
 
-  return mintTunegoNfts(
+  return mintTuneGONFT(
     recipient,
     itemId,
     collectionId,
@@ -226,24 +204,24 @@ export const mintRandomTunegoNfts = async (
     metadata,
     [],
     {},
-    minter,
+    minter
   );
 };
 
 /*
- * Transfers TunegoNft NFT with id equal **collectibleId** from **sender** account to **recipient**.
+ * Transfers TuneGONFT NFT with id equal **collectibleId** from **sender** account to **recipient**.
  * @param {string} sender - sender address
  * @param {string} recipient - recipient address
  * @param {UInt64} collectibleId - id of the item to transfer
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const transferTunegoNft = async (sender, recipient, collectibleId) => {
-  const NonFungibleToken = await getTunegoAddress();
-  const TunegoNfts = await getTunegoAddress();
+export const transferTuneGONFT = async (sender, recipient, collectibleId) => {
+  const NonFungibleToken = await getTuneGOAddress();
+  const TuneGONFT = await getTuneGOAddress();
 
-  const name = 'tunegoNft/transfer_tunego_nft';
-  const addressMap = { NonFungibleToken, TunegoNfts };
+  const name = "tunegoNFT/transfer_tunego_nft";
+  const addressMap = { NonFungibleToken, TuneGONFT };
   const code = await getTransactionCode({ name, addressMap });
 
   const signers = [sender];
@@ -256,16 +234,16 @@ export const transferTunegoNft = async (sender, recipient, collectibleId) => {
 };
 
 /*
- * Returns TunegoNft with **id** in account collection.
+ * Returns TuneGONFT with **id** in account collection.
  * @throws Will throw an error if execution fails
- * @returns {Promise<TunegoNft>}
+ * @returns {Promise<TuneGONFT>}
  * */
-export const getTunegoNftById = async (account, id) => {
-  const TunegoNfts = await getTunegoAddress();
-  const NonFungibleToken = await getTunegoAddress();
+export const getTuneGONFTById = async (account, id) => {
+  const TuneGONFT = await getTuneGOAddress();
+  const NonFungibleToken = await getTuneGOAddress();
 
-  const name = 'tunegoNft/read_tunego_nft';
-  const addressMap = { TunegoNfts, NonFungibleToken };
+  const name = "tunegoNFT/read_tunego_nft";
+  const addressMap = { TuneGONFT, NonFungibleToken };
   const code = await getScriptCode({ name, addressMap });
 
   const args = [
@@ -277,17 +255,17 @@ export const getTunegoNftById = async (account, id) => {
 };
 
 /*
- * Returns TunegoNft MetadataViews.
+ * Returns TuneGONFT MetadataViews.
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const getTunegoNftViewsById = async (account, id) => {
-  const TunegoNfts = await getTunegoAddress();
-  const NonFungibleToken = await getTunegoAddress();
-  const MetadataViews = await getTunegoAddress();
+export const getTuneGONFTViewsById = async (account, id) => {
+  const TuneGONFT = await getTuneGOAddress();
+  const NonFungibleToken = await getTuneGOAddress();
+  const MetadataViews = await getTuneGOAddress();
 
-  const name = 'tunegoNft/read_tunego_nft_views';
-  const addressMap = { TunegoNfts, NonFungibleToken, MetadataViews };
+  const name = "tunegoNFT/read_tunego_nft_views";
+  const addressMap = { TuneGONFT, NonFungibleToken, MetadataViews };
   const code = await getScriptCode({ name, addressMap });
 
   const args = [
@@ -299,15 +277,15 @@ export const getTunegoNftViewsById = async (account, id) => {
 };
 
 /*
- * Returns TunegoNft additionalInfo.
+ * Returns TuneGONFT additionalInfo.
  * @throws Will throw an error if execution fails
  * */
-export const getTunegoNftAdditionalInfoById = async (account, id) => {
-  const TunegoNfts = await getTunegoAddress();
-  const NonFungibleToken = await getTunegoAddress();
+export const getTuneGONFTAdditionalInfoById = async (account, id) => {
+  const TuneGONFT = await getTuneGOAddress();
+  const NonFungibleToken = await getTuneGOAddress();
 
-  const name = 'tunegoNft/read_tunego_nft_additional_info';
-  const addressMap = { TunegoNfts, NonFungibleToken };
+  const name = "tunegoNFT/read_tunego_nft_additional_info";
+  const addressMap = { TuneGONFT, NonFungibleToken };
   const code = await getScriptCode({ name, addressMap });
 
   const args = [
@@ -319,16 +297,16 @@ export const getTunegoNftAdditionalInfoById = async (account, id) => {
 };
 
 /*
- * Returns the length of account's TunegoNfts collection.
+ * Returns the length of account's TuneGONFT collection.
  * @throws Will throw an error if execution fails
  * @returns {Promise<UInt64>}
  * */
-export const getTunegoNftsCollectionLength = async (account) => {
-  const TunegoNfts = await getTunegoAddress();
-  const NonFungibleToken = await getContractAddress('NonFungibleToken');
+export const getTuneGONFTCollectionLength = async (account) => {
+  const TuneGONFT = await getTuneGOAddress();
+  const NonFungibleToken = await getContractAddress("NonFungibleToken");
 
-  const name = 'tunegoNft/read_collection_length';
-  const addressMap = { NonFungibleToken, TunegoNfts };
+  const name = "tunegoNFT/read_collection_length";
+  const addressMap = { NonFungibleToken, TuneGONFT };
 
   const code = await getScriptCode({ name, addressMap });
   const args = [[account, Address]];

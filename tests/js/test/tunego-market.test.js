@@ -1,4 +1,4 @@
-import path from 'path';
+import path from "path";
 import {
   init,
   getAccountAddress,
@@ -6,23 +6,25 @@ import {
   shallRevert,
   mintFlow,
   emulator,
-} from 'flow-js-testing';
+} from "flow-js-testing";
 import {
-  getTunegoAddress,
-  getTunegoAdminAddress,
+  getTuneGOAddress,
+  getTuneGOAdminAddress,
   toUFix64,
-} from '../src/common';
+} from "../src/common";
 import {
-  getTunegoNftsCollectionLength,
-  mintRandomTunegoNfts,
-} from '../src/tunego-nfts';
+  deployTuneGONFT,
+  getTuneGONFTCollectionLength,
+  mintRandomTuneGONFT,
+  setupTuneGONFTOnAccount,
+} from "../src/tunego-nft";
 import {
   acceptSaleOffer,
   deployMarket,
   createSaleOffer,
   removeSaleOffer,
   getMarketCollectionLength,
-  setupTunegoMarketOnAccount,
+  setupTuneGOMarketOnAccount,
   TUNEGO_FEE_PERCENTAGE,
   TUNEGO_NFTS_CONTRACT_NAME,
   TUNEGO_CONTRACT_NAME,
@@ -30,20 +32,22 @@ import {
   getSaleOfferIdFromTransactionResult,
   transferAdminResource,
   createAdminResource,
-  addSupportedNftType,
+  addSupportedNFTType,
   getMarketFee,
-  setTunegoFee,
-} from '../src/tunego-market';
-import { getFlowTokenBalance } from '../src/flow-token';
+  setTuneGOFee,
+  createSaleOfferLegacy,
+  acceptSaleOfferLegacy,
+} from "../src/tunego-market";
+import { getFlowTokenBalance } from "../src/flow-token";
 import {
   mintTicalUniverse,
   setupTicalUniverseItems,
-} from '../src/tical-universe';
-import { mintTuneGO, setupTuneGOItems } from '../src/tunego';
+} from "../src/tical-universe";
+import { mintTuneGO, setupTuneGOItems } from "../src/tunego";
 
-describe('Tunego Market', () => {
+describe("TuneGO Market", () => {
   beforeEach(async () => {
-    const basePath = path.resolve(__dirname, '../../../');
+    const basePath = path.resolve(__dirname, "../../../");
     const port = 9080;
     const logging = false;
 
@@ -55,86 +59,96 @@ describe('Tunego Market', () => {
     await emulator.stop();
   });
 
-  it('should deploy TunegoMarket contract', async () => {
+  it("should deploy TuneGOMarket contract", async () => {
     await shallPass(deployMarket());
   });
 
-  it('should be possible to create an empty TunegoMarket Collection', async () => {
+  it("should be possible to create an empty TuneGOMarket Collection", async () => {
     await deployMarket();
-    const Seller = await getAccountAddress('Seller');
+    const Seller = await getAccountAddress("Seller");
 
-    await shallPass(setupTunegoMarketOnAccount(Seller));
+    await shallPass(setupTuneGOMarketOnAccount(Seller));
   });
 
-  it('should be possible to create SaleOffer with legacy NFTs', async () => {
+  it("should be possible to create SaleOffer with legacy NFTs", async () => {
     await deployMarket();
     await setupTuneGOItems();
     await setupTicalUniverseItems();
 
-    const Seller = await getAccountAddress('Seller');
+    const Seller = await getAccountAddress("Seller");
     await mintTuneGO(Seller);
     await mintTicalUniverse(Seller);
 
     await shallPass(
-      createSaleOffer(Seller, TUNEGO_CONTRACT_NAME, 1, toUFix64(1.11)),
+      createSaleOfferLegacy(Seller, TUNEGO_CONTRACT_NAME, 1, toUFix64(1.11))
     );
     await shallPass(
-      createSaleOffer(Seller, TICAL_UNIVERSE_CONTRACT_NAME, 1, toUFix64(1.11)),
+      createSaleOfferLegacy(
+        Seller,
+        TICAL_UNIVERSE_CONTRACT_NAME,
+        1,
+        toUFix64(1.11)
+      )
     );
   });
 
-  it('should not be possible to create SaleOffer with unsupported NFT type', async () => {
+  it("should not be possible to create SaleOffer with unsupported NFT type", async () => {
     await deployMarket();
+    await deployTuneGONFT();
 
-    const Seller = await getAccountAddress('Seller');
-    await mintRandomTunegoNfts(Seller);
+    const Seller = await getAccountAddress("Seller");
+    await setupTuneGONFTOnAccount(Seller);
+    await mintRandomTuneGONFT(Seller);
 
     await shallRevert(
-      createSaleOffer(Seller, TUNEGO_NFTS_CONTRACT_NAME, 0, toUFix64(1.11)),
+      createSaleOffer(Seller, TUNEGO_NFTS_CONTRACT_NAME, 0, toUFix64(1.11))
     );
   });
 
-  it('should be possible to create SaleOffer with unsupported NFT after adding it as supported type', async () => {
+  it("should be possible to create SaleOffer with unsupported NFT after adding it as supported type", async () => {
     await deployMarket();
+    await deployTuneGONFT();
 
-    const Seller = await getAccountAddress('Seller');
-    await mintRandomTunegoNfts(Seller);
+    const Seller = await getAccountAddress("Seller");
+    await setupTuneGONFTOnAccount(Seller);
+    await mintRandomTuneGONFT(Seller);
 
-    await shallPass(addSupportedNftType());
+    await shallPass(addSupportedNFTType());
     await shallPass(
-      createSaleOffer(Seller, TUNEGO_NFTS_CONTRACT_NAME, 0, toUFix64(1.11)),
+      createSaleOffer(Seller, TUNEGO_NFTS_CONTRACT_NAME, 0, toUFix64(1.11))
     );
   });
 
-  it('should be possible to change MarketFee', async () => {
+  it("should be possible to change MarketFee", async () => {
     await deployMarket();
-    const Tunego = await getTunegoAddress();
+    const TuneGO = await getTuneGOAddress();
 
     const [initialMarketFee] = await getMarketFee();
-    expect(initialMarketFee.receiver).toEqual(Tunego);
+    expect(initialMarketFee.receiver).toEqual(TuneGO);
     expect(Number(initialMarketFee.percentage)).toEqual(TUNEGO_FEE_PERCENTAGE);
 
-    const newReceiver = await getAccountAddress('NewReceiver');
+    const newReceiver = await getAccountAddress("NewReceiver");
     const newPercentage = 5.0;
-    await shallPass(setTunegoFee(newReceiver, toUFix64(newPercentage)));
+    await shallPass(setTuneGOFee(newReceiver, toUFix64(newPercentage)));
 
     const [newMarketFee] = await getMarketFee();
     expect(newMarketFee.receiver).toEqual(newReceiver);
     expect(Number(newMarketFee.percentage)).toEqual(newPercentage);
   });
 
-  it('should only apply new market fee for new sale offers', async () => {
+  it("should only apply new market fee for new sale offers", async () => {
     await deployMarket();
-    const Seller = await getAccountAddress('Seller');
-    const Buyer = await getAccountAddress('Buyer');
-    const Tunego = await getTunegoAddress();
+    await deployTuneGONFT();
+    const Seller = await getAccountAddress("Seller");
+    const Buyer = await getAccountAddress("Buyer");
+    const TuneGO = await getTuneGOAddress();
 
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     await mintFlow(Buyer, toUFix64(1000));
 
     const [initialMarketFee] = await getMarketFee();
-    expect(initialMarketFee.receiver).toEqual(Tunego);
+    expect(initialMarketFee.receiver).toEqual(TuneGO);
     expect(Number(initialMarketFee.percentage)).toEqual(TUNEGO_FEE_PERCENTAGE);
 
     const nftPrice = 100.0;
@@ -143,89 +157,90 @@ describe('Tunego Market', () => {
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       0,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
-    const newReceiver = await getAccountAddress('NewReceiver');
+    const newReceiver = await getAccountAddress("NewReceiver");
     const newPercentage = 5.0;
-    const newTunegoFee = (nftPrice * newPercentage) / 100;
-    await shallPass(setTunegoFee(newReceiver, toUFix64(newPercentage)));
+    const newTuneGOFee = (nftPrice * newPercentage) / 100;
+    await shallPass(setTuneGOFee(newReceiver, toUFix64(newPercentage)));
 
     const [buyerBalanceBefore] = await getFlowTokenBalance(Buyer);
     const [sellerBalanceBefore] = await getFlowTokenBalance(Seller);
-    const [tunegoBalanceBefore] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceBefore] = await getFlowTokenBalance(TuneGO);
 
     await shallPass(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller)
     );
 
     const [buyerBalanceAfter] = await getFlowTokenBalance(Buyer);
     const [sellerBalanceAfter] = await getFlowTokenBalance(Seller);
-    const [tunegoBalanceAfter] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceAfter] = await getFlowTokenBalance(TuneGO);
 
     expect(Number(buyerBalanceAfter)).toBeCloseTo(
       Number(buyerBalanceBefore) - nftPrice,
-      6,
+      6
     );
     expect(Number(sellerBalanceAfter)).toBeCloseTo(
       Number(sellerBalanceBefore) + nftPrice - tunegoFee,
-      6,
+      6
     );
     expect(Number(tunegoBalanceAfter)).toBeCloseTo(
       Number(tunegoBalanceBefore) + tunegoFee,
-      6,
+      6
     );
 
     const [newTransactionResult] = await createSaleOffer(
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       1,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const newSaleOfferId =
       getSaleOfferIdFromTransactionResult(newTransactionResult);
 
     const [newBuyerBalanceBefore] = await getFlowTokenBalance(Buyer);
     const [newSellerBalanceBefore] = await getFlowTokenBalance(Seller);
-    const [newTunegoBalanceBefore] = await getFlowTokenBalance(Tunego);
+    const [newTuneGOBalanceBefore] = await getFlowTokenBalance(TuneGO);
     const [newReceiverBalanceBefore] = await getFlowTokenBalance(newReceiver);
 
     await shallPass(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, newSaleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, newSaleOfferId, Seller)
     );
 
     const [newBuyerBalanceAfter] = await getFlowTokenBalance(Buyer);
     const [newSellerBalanceAfter] = await getFlowTokenBalance(Seller);
-    const [newTunegoBalanceAfter] = await getFlowTokenBalance(Tunego);
+    const [newTuneGOBalanceAfter] = await getFlowTokenBalance(TuneGO);
     const [newReceiverBalanceAfter] = await getFlowTokenBalance(newReceiver);
 
     expect(Number(newBuyerBalanceAfter)).toBeCloseTo(
       Number(newBuyerBalanceBefore) - nftPrice,
-      6,
+      6
     );
     expect(Number(newSellerBalanceAfter)).toBeCloseTo(
-      Number(newSellerBalanceBefore) + nftPrice - newTunegoFee,
-      6,
+      Number(newSellerBalanceBefore) + nftPrice - newTuneGOFee,
+      6
     );
-    expect(Number(newTunegoBalanceAfter)).toBeCloseTo(
-      Number(newTunegoBalanceBefore),
-      6,
+    expect(Number(newTuneGOBalanceAfter)).toBeCloseTo(
+      Number(newTuneGOBalanceBefore),
+      6
     );
     expect(Number(newReceiverBalanceAfter)).toBeCloseTo(
-      Number(newReceiverBalanceBefore) + newTunegoFee,
-      6,
+      Number(newReceiverBalanceBefore) + newTuneGOFee,
+      6
     );
   });
 
-  it('should not be possible create sale offer with fees >= 100%', async () => {
-    const Seller = await getAccountAddress('Seller');
-    const Recipient1 = await getAccountAddress('Recipient1');
-    const Recipient2 = await getAccountAddress('Recipient2');
+  it("should not be possible create sale offer with fees >= 100%", async () => {
+    const Seller = await getAccountAddress("Seller");
+    const Recipient1 = await getAccountAddress("Recipient1");
+    const Recipient2 = await getAccountAddress("Recipient2");
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
 
     const nftPrice = 100.0;
 
@@ -238,8 +253,8 @@ describe('Tunego Market', () => {
         [
           { receiver: Recipient1, percentage: 50 - TUNEGO_FEE_PERCENTAGE },
           { receiver: Recipient2, percentage: 50 },
-        ],
-      ),
+        ]
+      )
     );
     await shallPass(
       createSaleOffer(
@@ -250,19 +265,20 @@ describe('Tunego Market', () => {
         [
           { receiver: Recipient1, percentage: 44.99 - TUNEGO_FEE_PERCENTAGE },
           { receiver: Recipient2, percentage: 50 },
-        ],
-      ),
+        ]
+      )
     );
   });
 
-  it('should be possible to accept TunegoNfts SaleOffer', async () => {
-    const Seller = await getAccountAddress('Seller');
-    const Buyer = await getAccountAddress('Buyer');
-    const Tunego = await getTunegoAddress();
+  it("should be possible to accept TuneGONFT SaleOffer", async () => {
+    const Seller = await getAccountAddress("Seller");
+    const Buyer = await getAccountAddress("Buyer");
+    const TuneGO = await getTuneGOAddress();
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     await mintFlow(Buyer, toUFix64(1000));
 
     const nftPrice = 100.0;
@@ -271,7 +287,7 @@ describe('Tunego Market', () => {
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       0,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
@@ -280,40 +296,38 @@ describe('Tunego Market', () => {
 
     const [buyerBalanceBefore] = await getFlowTokenBalance(Buyer);
     const [sellerBalanceBefore] = await getFlowTokenBalance(Seller);
-    const [tunegoBalanceBefore] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceBefore] = await getFlowTokenBalance(TuneGO);
 
     await shallPass(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller)
     );
 
     const [buyerBalanceAfter] = await getFlowTokenBalance(Buyer);
     const [sellerBalanceAfter] = await getFlowTokenBalance(Seller);
-    const [tunegoBalanceAfter] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceAfter] = await getFlowTokenBalance(TuneGO);
 
     expect(Number(buyerBalanceAfter)).toBeCloseTo(
       Number(buyerBalanceBefore) - nftPrice,
-      6,
+      6
     );
     expect(Number(sellerBalanceAfter)).toBeCloseTo(
       Number(sellerBalanceBefore) + nftPrice - tunegoFee,
-      6,
+      6
     );
     expect(Number(tunegoBalanceAfter)).toBeCloseTo(
       Number(tunegoBalanceBefore) + tunegoFee,
-      6,
+      6
     );
 
-    const [buyerCollectionLength] = await getTunegoNftsCollectionLength(Buyer);
-    const [sellerCollectionLength] = await getTunegoNftsCollectionLength(
-      Seller,
-    );
+    const [buyerCollectionLength] = await getTuneGONFTCollectionLength(Buyer);
+    const [sellerCollectionLength] = await getTuneGONFTCollectionLength(Seller);
     expect(buyerCollectionLength).toBe(1);
     expect(sellerCollectionLength).toBe(1);
   });
 
-  it('should be possible to accept TuneGO SaleOffer', async () => {
-    const seller = await getAccountAddress('seller');
-    const buyer = await getAccountAddress('buyer');
+  it("should be possible to accept TuneGO SaleOffer", async () => {
+    const seller = await getAccountAddress("seller");
+    const buyer = await getAccountAddress("buyer");
 
     await deployMarket();
     await setupTuneGOItems();
@@ -321,22 +335,22 @@ describe('Tunego Market', () => {
     await mintFlow(buyer, toUFix64(1000));
 
     const nftPrice = 100.0;
-    const [transactionResult] = await createSaleOffer(
+    const [transactionResult] = await createSaleOfferLegacy(
       seller,
       TUNEGO_CONTRACT_NAME,
       1,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
     await shallPass(
-      acceptSaleOffer(buyer, TUNEGO_CONTRACT_NAME, saleOfferId, seller),
+      acceptSaleOfferLegacy(buyer, TUNEGO_CONTRACT_NAME, saleOfferId, seller)
     );
   });
 
-  it('should be possible to accept TicalUniverse SaleOffer', async () => {
-    const Seller = await getAccountAddress('Seller');
-    const Buyer = await getAccountAddress('Buyer');
+  it("should be possible to accept TicalUniverse SaleOffer", async () => {
+    const Seller = await getAccountAddress("Seller");
+    const Buyer = await getAccountAddress("Buyer");
 
     await deployMarket();
     await setupTicalUniverseItems();
@@ -344,29 +358,35 @@ describe('Tunego Market', () => {
     await mintFlow(Buyer, toUFix64(1000));
 
     const nftPrice = 100.0;
-    const [transactionResult] = await createSaleOffer(
+    const [transactionResult] = await createSaleOfferLegacy(
       Seller,
       TICAL_UNIVERSE_CONTRACT_NAME,
       1,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
     await shallPass(
-      acceptSaleOffer(Buyer, TICAL_UNIVERSE_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOfferLegacy(
+        Buyer,
+        TICAL_UNIVERSE_CONTRACT_NAME,
+        saleOfferId,
+        Seller
+      )
     );
   });
 
-  it('should be possible to accept SaleOffer with royalties', async () => {
-    const Tunego = await getTunegoAddress();
-    const Seller = await getAccountAddress('Seller');
-    const Recipient1 = await getAccountAddress('Recipient1');
-    const Recipient2 = await getAccountAddress('Recipient2');
-    const Buyer = await getAccountAddress('Buyer');
+  it("should be possible to accept SaleOffer with royalties", async () => {
+    const TuneGO = await getTuneGOAddress();
+    const Seller = await getAccountAddress("Seller");
+    const Recipient1 = await getAccountAddress("Recipient1");
+    const Recipient2 = await getAccountAddress("Recipient2");
+    const Buyer = await getAccountAddress("Buyer");
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     await mintFlow(Buyer, toUFix64(1000));
 
     const nftPrice = 100.0;
@@ -384,7 +404,7 @@ describe('Tunego Market', () => {
       [
         { receiver: Recipient1, percentage: recipient1Percentage },
         { receiver: Recipient2, percentage: recipient2Percentage },
-      ],
+      ]
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
@@ -392,48 +412,49 @@ describe('Tunego Market', () => {
     const [sellerBalanceBefore] = await getFlowTokenBalance(Seller);
     const [recipient1BalanceBefore] = await getFlowTokenBalance(Recipient1);
     const [recipient2BalanceBefore] = await getFlowTokenBalance(Recipient2);
-    const [tunegoBalanceBefore] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceBefore] = await getFlowTokenBalance(TuneGO);
 
     await shallPass(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller)
     );
 
     const [buyerBalanceAfter] = await getFlowTokenBalance(Buyer);
     const [sellerBalanceAfter] = await getFlowTokenBalance(Seller);
     const [recipient1BalanceAfter] = await getFlowTokenBalance(Recipient1);
     const [recipient2BalanceAfter] = await getFlowTokenBalance(Recipient2);
-    const [tunegoBalanceAfter] = await getFlowTokenBalance(Tunego);
+    const [tunegoBalanceAfter] = await getFlowTokenBalance(TuneGO);
 
     expect(Number(buyerBalanceAfter)).toBeCloseTo(
       Number(buyerBalanceBefore) - nftPrice,
-      6,
+      6
     );
     expect(Number(sellerBalanceAfter)).toBeCloseTo(
       Number(sellerBalanceBefore) +
         (nftPrice - tunegoFee - recipient1Fee - recipient2Fee),
-      6,
+      6
     );
     expect(Number(recipient1BalanceAfter)).toBeCloseTo(
       Number(recipient1BalanceBefore) + recipient1Fee,
-      6,
+      6
     );
     expect(Number(recipient2BalanceAfter)).toBeCloseTo(
       Number(recipient2BalanceBefore) + recipient2Fee,
-      6,
+      6
     );
     expect(Number(tunegoBalanceAfter)).toBeCloseTo(
       Number(tunegoBalanceBefore) + tunegoFee,
-      6,
+      6
     );
   });
 
-  it('should not accept sale offer with insufficient buyer balance', async () => {
-    const Seller = await getAccountAddress('Seller');
-    const Buyer = await getAccountAddress('Buyer');
+  it("should not accept sale offer with insufficient buyer balance", async () => {
+    const Seller = await getAccountAddress("Seller");
+    const Buyer = await getAccountAddress("Buyer");
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     await mintFlow(Buyer, toUFix64(10));
 
     const nftPrice = 100;
@@ -441,22 +462,23 @@ describe('Tunego Market', () => {
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       0,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
     await shallRevert(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller)
     );
   });
 
-  it('should not accept removed sale offer', async () => {
-    const Seller = await getAccountAddress('Seller');
-    const Buyer = await getAccountAddress('Buyer');
+  it("should not accept removed sale offer", async () => {
+    const Seller = await getAccountAddress("Seller");
+    const Buyer = await getAccountAddress("Buyer");
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     await mintFlow(Buyer, toUFix64(1000));
 
     const nftPrice = 100.0;
@@ -464,28 +486,29 @@ describe('Tunego Market', () => {
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       0,
-      toUFix64(nftPrice),
+      toUFix64(nftPrice)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
     await shallPass(removeSaleOffer(Seller, saleOfferId));
 
     await shallRevert(
-      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller),
+      acceptSaleOffer(Buyer, TUNEGO_NFTS_CONTRACT_NAME, saleOfferId, Seller)
     );
   });
 
-  it('should be possible to remove SaleOffer', async () => {
-    const Seller = await getAccountAddress('Seller');
+  it("should be possible to remove SaleOffer", async () => {
+    const Seller = await getAccountAddress("Seller");
 
     await deployMarket();
-    await addSupportedNftType();
-    await mintRandomTunegoNfts(Seller, 2);
+    await deployTuneGONFT();
+    await addSupportedNFTType();
+    await mintRandomTuneGONFT(Seller, 2);
     const [transactionResult] = await createSaleOffer(
       Seller,
       TUNEGO_NFTS_CONTRACT_NAME,
       0,
-      toUFix64(1.11),
+      toUFix64(1.11)
     );
     const saleOfferId = getSaleOfferIdFromTransactionResult(transactionResult);
 
@@ -498,18 +521,18 @@ describe('Tunego Market', () => {
     expect(itemsListed).toBe(0);
   });
 
-  it('should be possible to transfer admin resource', async () => {
+  it("should be possible to transfer admin resource", async () => {
     await deployMarket();
-    const CurrentAdmin = await getTunegoAdminAddress();
-    const NewAdmin = await getAccountAddress('NewAdmin');
+    const CurrentAdmin = await getTuneGOAdminAddress();
+    const NewAdmin = await getAccountAddress("NewAdmin");
 
     await shallPass(transferAdminResource(CurrentAdmin, NewAdmin));
   });
 
-  it('should be possible to create new admin resource', async () => {
+  it("should be possible to create new admin resource", async () => {
     await deployMarket();
-    const CurrentAdmin = await getTunegoAdminAddress();
-    const NewAdmin = await getAccountAddress('NewAdmin');
+    const CurrentAdmin = await getTuneGOAdminAddress();
+    const NewAdmin = await getAccountAddress("NewAdmin");
 
     await shallPass(createAdminResource(CurrentAdmin, NewAdmin));
   });

@@ -1,7 +1,7 @@
-import TunegoNfts from "../../contracts/TunegoNfts.cdc"
+import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 
-// This scripts returns the number of TunegoNfts currently in existence.
+// This scripts returns the number of TuneGONFT currently in existence.
 
 pub fun main(): UInt64 {    
-    return TunegoNfts.totalSupply
+    return TuneGONFT.totalSupply
 }

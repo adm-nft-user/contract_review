@@ -1,67 +1,42 @@
-import { UFix64, UInt64, Address, String, Dictionary } from '@onflow/types';
+import { UFix64, UInt64, Address, String, Dictionary } from "@onflow/types";
 import {
-  getContractCode,
   getTransactionCode,
   getScriptCode,
   executeScript,
   sendTransaction,
-} from 'flow-js-testing';
+  deployContractByName,
+} from "flow-js-testing";
 import {
   getFlowTokenAddress,
   getFungibleTokenAddress,
   getNonFungibleTokenAddress,
-  getTunegoAddress,
-  getTunegoAdminAddress,
-  registerContract,
+  getTuneGOAddress,
+  getTuneGOAdminAddress,
   toUFix64,
-} from './common';
-import { deployTicalUniverse } from './tical-universe';
-import { deployTuneGO } from './tunego';
-import { deployTunegoNfts } from './tunego-nfts';
+} from "./common";
+import { deployTicalUniverse } from "./tical-universe";
+import { deployTuneGO } from "./tunego";
 
 export const TUNEGO_FEE_PERCENTAGE = 2.5;
-export const TUNEGO_NFTS_CONTRACT_NAME = 'TunegoNfts';
-export const TUNEGO_CONTRACT_NAME = 'TuneGO';
-export const TICAL_UNIVERSE_CONTRACT_NAME = 'TicalUniverse';
+export const TUNEGO_NFTS_CONTRACT_NAME = "TuneGONFT";
+export const TUNEGO_CONTRACT_NAME = "TuneGO";
+export const TICAL_UNIVERSE_CONTRACT_NAME = "TicalUniverse";
 
 /*
- * Deploys TunegoNfts and TunegoMarket contracts.
+ * Deploys TuneGONFT and TuneGOMarket contracts.
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
 export const deployMarket = async () => {
-  await deployTunegoNfts();
+  const TuneGO = await getTuneGOAddress();
+
   await deployTuneGO();
   await deployTicalUniverse();
 
-  const Tunego = await getTunegoAddress();
-  const NonFungibleToken = await getNonFungibleTokenAddress();
-  const addressMap = {
-    FungibleToken: getFungibleTokenAddress(),
-    FlowToken: getFlowTokenAddress(),
-    NonFungibleToken: NonFungibleToken,
-    TunegoNfts: Tunego,
-    TuneGO: Tunego,
-    TicalUniverse: Tunego,
-  };
-
-  const contractName = 'TunegoMarket';
-  const contractCode = await getContractCode({
-    name: contractName,
-    addressMap,
+  return deployContractByName({
+    to: TuneGO,
+    name: "TuneGOMarket",
   });
-  const contractCodeHex = Buffer.from(contractCode).toString('hex');
-  const code = await getTransactionCode({
-    name: 'tunegoMarket/deploy_contract',
-  });
-  const signers = [Tunego];
-  const args = [
-    [contractName, String],
-    [contractCodeHex, String],
-  ];
-
-  await registerContract(contractName, Tunego);
-  return sendTransaction({ code, signers, args });
 };
 
 /*
@@ -72,10 +47,10 @@ export const deployMarket = async () => {
  * @returns {Promise<*>}
  * */
 export const createAdminResource = async (admin, newAdmin) => {
-  const TunegoMarket = await getTunegoAddress();
+  const TuneGOMarket = await getTuneGOAddress();
 
-  const name = 'tunegoMarket/create_admin_resource';
-  const addressMap = { TunegoMarket };
+  const name = "tunegoMarket/create_admin_resource";
+  const addressMap = { TuneGOMarket };
   const code = await getTransactionCode({ name, addressMap });
 
   const signers = [admin, newAdmin];
@@ -92,10 +67,10 @@ export const createAdminResource = async (admin, newAdmin) => {
  * @returns {Promise<*>}
  * */
 export const transferAdminResource = async (admin, newAdmin) => {
-  const TunegoMarket = await getTunegoAddress();
+  const TuneGOMarket = await getTuneGOAddress();
 
-  const name = 'tunegoMarket/transfer_admin_resource';
-  const addressMap = { TunegoMarket };
+  const name = "tunegoMarket/transfer_admin_resource";
+  const addressMap = { TuneGOMarket };
   const code = await getTransactionCode({ name, addressMap });
 
   const signers = [admin, newAdmin];
@@ -105,21 +80,21 @@ export const transferAdminResource = async (admin, newAdmin) => {
 };
 
 /*
- * Set TunegoFee
+ * Set TuneGOFee
  * @param {string} receiver - receiver address
  * @param {UFix64} percentage - fee percentage
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const setTunegoFee = async (receiver, percentage) => {
-  const TunegoAdmin = await getTunegoAdminAddress();
-  const TunegoMarket = await getTunegoAddress();
+export const setTuneGOFee = async (receiver, percentage) => {
+  const TuneGOAdmin = await getTuneGOAdminAddress();
+  const TuneGOMarket = await getTuneGOAddress();
 
-  const name = 'tunegoMarket/set_market_fee';
-  const addressMap = { TunegoMarket };
+  const name = "tunegoMarket/set_market_fee";
+  const addressMap = { TuneGOMarket };
   const code = await getTransactionCode({ name, addressMap });
 
-  const signers = [TunegoAdmin];
+  const signers = [TuneGOAdmin];
   const args = [
     [receiver, Address],
     [percentage, UFix64],
@@ -133,31 +108,27 @@ export const setTunegoFee = async (receiver, percentage) => {
  * @throws Will throw an error if execution fails
  * @returns {Promise<*>}
  * */
-export const addSupportedNftType = async () => {
-  const TunegoAdmin = await getTunegoAdminAddress();
-  const TunegoNfts = await getTunegoAddress();
-  const TunegoMarket = await getTunegoAddress();
+export const addSupportedNFTType = async () => {
+  const TuneGOAdmin = await getTuneGOAdminAddress();
+  const name = "tunegoMarket/add_supported_nft_type";
+  const code = await getTransactionCode({ name });
 
-  const name = 'tunegoMarket/add_supported_nft_type';
-  const addressMap = { TunegoMarket, TunegoNfts };
-  const code = await getTransactionCode({ name, addressMap });
-
-  const signers = [TunegoAdmin];
+  const signers = [TuneGOAdmin];
   const args = [];
 
   return sendTransaction({ code, signers, args });
 };
 
 /*
- * Setups TunegoMarket collection on account and exposes public capability.
+ * Setups TuneGOMarket collection on account and exposes public capability.
  * @param {string} account - account address
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
-export const setupTunegoMarketOnAccount = async (account) => {
-  const TunegoMarket = await getTunegoAddress();
-  const addressMap = { TunegoMarket };
-  const name = 'tunegoMarket/setup_account';
+export const setupTuneGOMarketOnAccount = async (account) => {
+  const TuneGOMarket = await getTuneGOAddress();
+  const addressMap = { TuneGOMarket };
+  const name = "tunegoMarket/setup_account";
 
   const code = await getTransactionCode({ name, addressMap });
   const signers = [account];
@@ -172,6 +143,7 @@ export const setupTunegoMarketOnAccount = async (account) => {
  * @param {UInt64} collectibleId - collectible token id
  * @param {UFix64} price - collectible token price
  * @param {Array}  royalties - list of royalties receivers with percentages
+ * @param {string} transaction name
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
@@ -181,21 +153,21 @@ export const createSaleOffer = async (
   collectibleId,
   price,
   royalties = [],
+  txName = "tunegoMarket/sell_market_item"
 ) => {
-  const Tunego = await getTunegoAddress();
+  const TuneGO = await getTuneGOAddress();
   const NonFungibleToken = await getNonFungibleTokenAddress();
   const addressMap = {
     FungibleToken: getFungibleTokenAddress(),
     FlowToken: getFlowTokenAddress(),
     NonFungibleToken: NonFungibleToken,
-    TunegoNfts: Tunego,
-    TuneGO: Tunego,
-    TicalUniverse: Tunego,
-    TunegoMarket: Tunego,
+    TuneGONFT: TuneGO,
+    TuneGO: TuneGO,
+    TicalUniverse: TuneGO,
+    TuneGOMarket: TuneGO,
   };
-  const name = 'tunegoMarket/sell_market_item';
 
-  const code = await getTransactionCode({ name, addressMap });
+  const code = await getTransactionCode({ name: txName, addressMap });
   const signers = [seller];
   const args = [
     [collectibleContractName, String],
@@ -213,11 +185,40 @@ export const createSaleOffer = async (
 };
 
 /*
+ * Lists item with id equal to **item** id for sale with specified **price**.
+ * @param {string} seller - account address
+ * @param {string} collectibleContractName - name of collectible contract
+ * @param {UInt64} collectibleId - collectible token id
+ * @param {UFix64} price - collectible token price
+ * @param {Array}  royalties - list of royalties receivers with percentages
+ * @param {string} transaction name
+ * @throws Will throw an error if transaction is reverted.
+ * @returns {Promise<*>}
+ * */
+export const createSaleOfferLegacy = async (
+  seller,
+  collectibleContractName,
+  collectibleId,
+  price,
+  royalties = []
+) => {
+  return createSaleOffer(
+    seller,
+    collectibleContractName,
+    collectibleId,
+    price,
+    royalties,
+    "tunegoMarket/sell_market_item_legacy"
+  );
+};
+
+/*
  * Accepts sale offer with **saleOffer** id.
  * @param {string} buyer - buyer address
  * @param {string} collectibleContractName - name of collectible contract
  * @param {UInt64} saleOfferId - sale offer resource id
  * @param {string} seller - seller address
+ * @param {string} transaction name
  * @throws Will throw an error if transaction is reverted.
  * @returns {Promise<*>}
  * */
@@ -226,21 +227,21 @@ export const acceptSaleOffer = async (
   collectibleContractName,
   saleOfferId,
   seller,
+  txName = "tunegoMarket/buy_market_item"
 ) => {
-  const Tunego = await getTunegoAddress();
+  const TuneGO = await getTuneGOAddress();
   const NonFungibleToken = await getNonFungibleTokenAddress();
   const addressMap = {
     FungibleToken: getFungibleTokenAddress(),
     FlowToken: getFlowTokenAddress(),
     NonFungibleToken: NonFungibleToken,
-    TunegoNfts: Tunego,
-    TuneGO: Tunego,
-    TicalUniverse: Tunego,
-    TunegoMarket: Tunego,
+    TuneGONFT: TuneGO,
+    TuneGO: TuneGO,
+    TicalUniverse: TuneGO,
+    TuneGOMarket: TuneGO,
   };
-  const name = 'tunegoMarket/buy_market_item';
 
-  const code = await getTransactionCode({ name, addressMap });
+  const code = await getTransactionCode({ name: txName, addressMap });
   const signers = [buyer];
   const args = [
     [collectibleContractName, String],
@@ -251,6 +252,30 @@ export const acceptSaleOffer = async (
 };
 
 /*
+ * Accepts sale offer with **saleOffer** id.
+ * @param {string} buyer - buyer address
+ * @param {string} collectibleContractName - name of collectible contract
+ * @param {UInt64} saleOfferId - sale offer resource id
+ * @param {string} seller - seller address
+ * @throws Will throw an error if transaction is reverted.
+ * @returns {Promise<*>}
+ * */
+export const acceptSaleOfferLegacy = async (
+  buyer,
+  collectibleContractName,
+  saleOfferId,
+  seller
+) => {
+  return acceptSaleOffer(
+    buyer,
+    collectibleContractName,
+    saleOfferId,
+    seller,
+    "tunegoMarket/buy_market_item_legacy"
+  );
+};
+
+/*
  * Removes sale offer with id equal to **saleOffer** from sale offers.
  * @param {string} owner - seller address
  * @param {UInt64} saleOfferId - sale offer resource id
@@ -258,9 +283,9 @@ export const acceptSaleOffer = async (
  * @returns {Promise<*>}
  * */
 export const removeSaleOffer = async (owner, saleOfferId) => {
-  const TunegoMarket = await getTunegoAddress();
-  const addressMap = { TunegoMarket };
-  const name = 'tunegoMarket/remove_market_item';
+  const TuneGOMarket = await getTuneGOAddress();
+  const addressMap = { TuneGOMarket };
+  const name = "tunegoMarket/remove_market_item";
 
   const code = await getTransactionCode({ name, addressMap });
   const signers = [owner];
@@ -276,9 +301,9 @@ export const removeSaleOffer = async (owner, saleOfferId) => {
  * @returns {UInt64}
  * */
 export const getMarketCollectionLength = async (account) => {
-  const TunegoMarket = await getTunegoAddress();
-  const addressMap = { TunegoMarket };
-  const name = 'tunegoMarket/read_collection_length';
+  const TuneGOMarket = await getTuneGOAddress();
+  const addressMap = { TuneGOMarket };
+  const name = "tunegoMarket/read_collection_length";
 
   const code = await getScriptCode({ name, addressMap });
   const args = [[account, Address]];
@@ -292,9 +317,9 @@ export const getMarketCollectionLength = async (account) => {
  * @returns {MarketFee}
  * */
 export const getMarketFee = async () => {
-  const TunegoMarket = await getTunegoAddress();
-  const addressMap = { TunegoMarket };
-  const name = 'tunegoMarket/get_market_fee';
+  const TuneGOMarket = await getTuneGOAddress();
+  const addressMap = { TuneGOMarket };
+  const name = "tunegoMarket/get_market_fee";
 
   const code = await getScriptCode({ name, addressMap });
   const args = [];

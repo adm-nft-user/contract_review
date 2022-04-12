@@ -1,12 +1,12 @@
-import TunegoMarket from "../../contracts/TunegoMarket.cdc"
+import TuneGOMarket from "../../contracts/TuneGOMarket.cdc"
 
 transaction() {
 
     prepare(admin: AuthAccount, newAdmin: AuthAccount) {
 
-        let adminResource <- admin.load<@TunegoMarket.Admin>(from: TunegoMarket.AdminStoragePath)
+        let adminResource <- admin.load<@TuneGOMarket.Admin>(from: TuneGOMarket.AdminStoragePath)
             ?? panic("No admin in storage")
 
-        newAdmin.save(<- adminResource, to: TunegoMarket.AdminStoragePath)
+        newAdmin.save(<- adminResource, to: TuneGOMarket.AdminStoragePath)
     }
 }

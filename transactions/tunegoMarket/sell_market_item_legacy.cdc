@@ -1,19 +1,12 @@
 import FungibleToken from "../../contracts/FungibleToken.cdc"
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 import FlowToken from "../../contracts/FlowToken.cdc"
-import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 import TuneGO from "../../contracts/TuneGO.cdc"
 import TicalUniverse from "../../contracts/TicalUniverse.cdc"
 import TuneGOMarket from "../../contracts/TuneGOMarket.cdc"
 
 pub fun getOrCreateNFTProviderCapability(account: AuthAccount, contractName: String): Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}> {
     switch contractName {
-        case "TuneGONFT":
-            let tunegoNFTCollectionProviderPrivatePath = /private/tunegoNFTCollectionProvider
-            if !account.getCapability<&TuneGONFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(tunegoNFTCollectionProviderPrivatePath)!.check() {
-                account.link<&TuneGONFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(tunegoNFTCollectionProviderPrivatePath, target: TuneGONFT.CollectionStoragePath)
-            }
-            return account.getCapability<&TuneGONFT.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(tunegoNFTCollectionProviderPrivatePath)!
         case "TuneGO":
             let tunegoCollectionProviderPrivatePath = /private/tunegoCollectionProvider
             if !account.getCapability<&TuneGO.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(tunegoCollectionProviderPrivatePath)!.check() {
@@ -48,7 +41,7 @@ transaction(collectibleContractName: String, collectibleId: UInt64, price: UFix6
 
     prepare(signer: AuthAccount) {
 
-        assert(["TuneGONFT", "TuneGO", "TicalUniverse"].contains(collectibleContractName), message: "Contract not supported")
+        assert(["TuneGO", "TicalUniverse"].contains(collectibleContractName), message: "Contract not supported")
 
         self.paymentReceiver = signer.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
         assert(self.paymentReceiver.borrow() != nil, message: "Missing payment receiver vault")

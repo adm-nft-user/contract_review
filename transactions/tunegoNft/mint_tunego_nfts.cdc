@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 import FungibleToken from "../../contracts/FungibleToken.cdc"
 import FlowToken from "../../contracts/FlowToken.cdc"
-import TunegoNfts from "../../contracts/TunegoNfts.cdc"
+import TuneGONFT from "../../contracts/TuneGONFT.cdc"
 
 transaction(
     recipient: Address,
@@ -17,12 +17,12 @@ transaction(
     additionalInfo: {String: String},
     quantity: UInt64
 ) {
-    let minter: &TunegoNfts.NFTMinter
-    let royalties: [TunegoNfts.Royalty]
+    let minter: &TuneGONFT.NFTMinter
+    let royalties: [TuneGONFT.Royalty]
 
     prepare(signer: AuthAccount) {
 
-        self.minter = signer.borrow<&TunegoNfts.NFTMinter>(from: TunegoNfts.MinterStoragePath)
+        self.minter = signer.borrow<&TuneGONFT.NFTMinter>(from: TuneGONFT.MinterStoragePath)
             ?? panic("Could not borrow a reference to the NFT minter")
 
         self.royalties = []
@@ -35,7 +35,7 @@ transaction(
 
             assert(vault.borrow() != nil, message: "Missing royalty receiver vault")
 
-            self.royalties.append(TunegoNfts.Royalty(
+            self.royalties.append(TuneGONFT.Royalty(
                 receiver: receiver,
                 percentage: royalties[receiver]!
             ))
@@ -47,11 +47,11 @@ transaction(
     execute {
         let recipient = getAccount(recipient)
         let recipientRef = recipient
-            .getCapability(TunegoNfts.CollectionPublicPath)
+            .getCapability(TuneGONFT.CollectionPublicPath)
             .borrow<&{NonFungibleToken.CollectionPublic}>()
             ?? panic("Could not get recipient reference to the NFT Collection")
 
-        let metadata = TunegoNfts.Metadata(
+        let metadata = TuneGONFT.Metadata(
             title: title,
             description: description,
             rarity: rarity,

@@ -8,27 +8,27 @@ import {
   emulator,
 } from 'flow-js-testing';
 import {
-  deployTunegoNfts,
-  getTunegoNftsCollectionLength,
-  getTunegoNftById,
-  getTunegoNftViewsById,
-  getTunegoNftSupply,
-  mintTunegoNfts,
-  mintRandomTunegoNfts,
-  setupTunegoNftsOnAccount,
-  transferTunegoNft,
+  deployTuneGONFT,
+  getTuneGONFTCollectionLength,
+  getTuneGONFTById,
+  getTuneGONFTViewsById,
+  getTuneGONFTSupply,
+  mintTuneGONFT,
+  mintRandomTuneGONFT,
+  setupTuneGONFTOnAccount,
+  transferTuneGONFT,
   getRandomMetadata,
-  getTunegoNftAdditionalInfoById,
+  getTuneGONFTAdditionalInfoById,
   transferNFTMinter,
   createNFTMinter,
-} from '../src/tunego-nfts';
+} from '../src/tunego-nft';
 import {
-  getTunegoAddress,
-  getTunegoAdminAddress,
+  getTuneGOAddress,
+  getTuneGOAdminAddress,
   toUFix64,
 } from '../src/common';
 
-describe('Tunego Nfts', () => {
+describe('TuneGO NFT', () => {
   beforeEach(async () => {
     const basePath = path.resolve(__dirname, '../../../');
     const port = 9080;
@@ -42,48 +42,48 @@ describe('Tunego Nfts', () => {
     await emulator.stop();
   });
 
-  it('should deploy TunegoNfts contract', async () => {
-    await shallPass(deployTunegoNfts());
+  it('should deploy TuneGONFT contract', async () => {
+    await shallPass(deployTuneGONFT());
   });
 
   it('supply should be 0 after contract is deployed', async () => {
-    await deployTunegoNfts();
-    const Tunego = await getTunegoAddress();
+    await deployTuneGONFT();
+    const TuneGO = await getTuneGOAddress();
 
-    await shallPass(setupTunegoNftsOnAccount(Tunego));
-    const [supply] = await shallResolve(getTunegoNftSupply());
+    await shallPass(setupTuneGONFTOnAccount(TuneGO));
+    const [supply] = await shallResolve(getTuneGONFTSupply());
 
     expect(supply).toBe(0);
   });
 
   it('should be possible to create a new empty NFT Collection', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
 
-    await setupTunegoNftsOnAccount(Seller);
-    const [length] = await shallResolve(getTunegoNftsCollectionLength(Seller));
+    await setupTuneGONFTOnAccount(Seller);
+    const [length] = await shallResolve(getTuneGONFTCollectionLength(Seller));
 
     expect(length).toBe(0);
   });
 
   it('should be possible to mint tunego nfts', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
 
-    await setupTunegoNftsOnAccount(Seller);
+    await setupTuneGONFTOnAccount(Seller);
 
     const itemId = 'test item id';
     const collectionId = 'test collection id';
     const quantity1 = 2;
     await shallPass(
-      mintRandomTunegoNfts(Seller, quantity1, { itemId, collectionId }),
+      mintRandomTuneGONFT(Seller, quantity1, { itemId, collectionId }),
     );
 
-    const [amount1] = await getTunegoNftsCollectionLength(Seller);
+    const [amount1] = await getTuneGONFTCollectionLength(Seller);
     expect(amount1).toBe(2);
 
-    const [nft1] = await getTunegoNftById(Seller, 0);
-    const [nft2] = await getTunegoNftById(Seller, 1);
+    const [nft1] = await getTuneGONFTById(Seller, 0);
+    const [nft2] = await getTuneGONFTById(Seller, 1);
     expect(nft1.itemId).toBe(itemId);
     expect(nft1.collectionId).toBe(collectionId);
     expect(nft1.edition).toBe(1);
@@ -93,14 +93,14 @@ describe('Tunego Nfts', () => {
 
     const quantity2 = 2;
     await shallPass(
-      mintRandomTunegoNfts(Seller, quantity2, { itemId, collectionId }),
+      mintRandomTuneGONFT(Seller, quantity2, { itemId, collectionId }),
     );
 
-    const [amount2] = await getTunegoNftsCollectionLength(Seller);
+    const [amount2] = await getTuneGONFTCollectionLength(Seller);
     expect(amount2).toBe(4);
 
-    const [nft3] = await getTunegoNftById(Seller, 2);
-    const [nft4] = await getTunegoNftById(Seller, 3);
+    const [nft3] = await getTuneGONFTById(Seller, 2);
+    const [nft4] = await getTuneGONFTById(Seller, 3);
     expect(nft3.itemId).toBe(itemId);
     expect(nft3.collectionId).toBe(collectionId);
     expect(nft3.edition).toBe(3);
@@ -110,10 +110,10 @@ describe('Tunego Nfts', () => {
   });
 
   it('should be possible to mint tunego nfts with additional info', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
 
-    await setupTunegoNftsOnAccount(Seller);
+    await setupTuneGONFTOnAccount(Seller);
 
     const itemId = 'test item id';
     const collectionId = 'test collection id';
@@ -123,7 +123,7 @@ describe('Tunego Nfts', () => {
     const additionalInfo = { info: 'testInfo' };
 
     await shallPass(
-      mintTunegoNfts(
+      mintTuneGONFT(
         Seller,
         itemId,
         collectionId,
@@ -134,7 +134,7 @@ describe('Tunego Nfts', () => {
       ),
     );
 
-    const [collectibleAdditionalInfo] = await getTunegoNftAdditionalInfoById(
+    const [collectibleAdditionalInfo] = await getTuneGONFTAdditionalInfoById(
       Seller,
       0,
     );
@@ -142,12 +142,12 @@ describe('Tunego Nfts', () => {
   });
 
   it('should be possible to read tunego nfts metadata views', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
     const RoyaltyReceiver = await getAccountAddress('RoyaltyReceiver');
     const royaltyPercentage = 2.5;
 
-    await setupTunegoNftsOnAccount(Seller);
+    await setupTuneGONFTOnAccount(Seller);
 
     const itemId = 'test item id';
     const collectionId = 'test collection id';
@@ -159,7 +159,7 @@ describe('Tunego Nfts', () => {
     const quantity = 2;
 
     await shallPass(
-      mintTunegoNfts(
+      mintTuneGONFT(
         Seller,
         itemId,
         collectionId,
@@ -170,10 +170,10 @@ describe('Tunego Nfts', () => {
       ),
     );
 
-    const [amount] = await getTunegoNftsCollectionLength(Seller);
+    const [amount] = await getTuneGONFTCollectionLength(Seller);
     expect(amount).toBe(2);
 
-    const [nftViews] = await getTunegoNftViewsById(Seller, 0);
+    const [nftViews] = await getTuneGONFTViewsById(Seller, 0);
     expect(nftViews.metadata).toEqual(metadata);
     expect(nftViews.edition).toEqual({
       edition: 1,
@@ -190,67 +190,67 @@ describe('Tunego Nfts', () => {
   });
 
   it('should not be possible to withdraw NFT that does not exist in a collection', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
     const Buyer = await getAccountAddress('Buyer');
 
-    await setupTunegoNftsOnAccount(Seller);
-    await setupTunegoNftsOnAccount(Buyer);
+    await setupTuneGONFTOnAccount(Seller);
+    await setupTuneGONFTOnAccount(Buyer);
 
-    await shallRevert(transferTunegoNft(Seller, Buyer, 9999));
+    await shallRevert(transferTuneGONFT(Seller, Buyer, 9999));
   });
 
   it('should be possible to withdraw NFT and deposit to another accounts collection', async () => {
-    await deployTunegoNfts();
+    await deployTuneGONFT();
     const Seller = await getAccountAddress('Seller');
     const Buyer = await getAccountAddress('Buyer');
 
-    await setupTunegoNftsOnAccount(Seller);
-    await setupTunegoNftsOnAccount(Buyer);
+    await setupTuneGONFTOnAccount(Seller);
+    await setupTuneGONFTOnAccount(Buyer);
 
-    await shallPass(mintRandomTunegoNfts(Seller));
-    await shallPass(transferTunegoNft(Seller, Buyer, 0));
+    await shallPass(mintRandomTuneGONFT(Seller));
+    await shallPass(transferTuneGONFT(Seller, Buyer, 0));
   });
 
   it('should be possible to transfer NFTMinter resource', async () => {
-    await deployTunegoNfts();
-    const NftsHolder = await getTunegoAdminAddress();
-    const CurrentAdmin = await getTunegoAdminAddress();
+    await deployTuneGONFT();
+    const NFTHolder = await getTuneGOAdminAddress();
+    const CurrentAdmin = await getTuneGOAdminAddress();
     const NewAdmin = await getAccountAddress('NewAdmin');
 
-    await setupTunegoNftsOnAccount(NftsHolder);
-    await shallPass(mintRandomTunegoNfts(NftsHolder, 1, {}, CurrentAdmin));
-    await shallRevert(mintRandomTunegoNfts(NftsHolder, 1, {}, NewAdmin));
+    await setupTuneGONFTOnAccount(NFTHolder);
+    await shallPass(mintRandomTuneGONFT(NFTHolder, 1, {}, CurrentAdmin));
+    await shallRevert(mintRandomTuneGONFT(NFTHolder, 1, {}, NewAdmin));
 
-    const [amount1] = await getTunegoNftsCollectionLength(NftsHolder);
+    const [amount1] = await getTuneGONFTCollectionLength(NFTHolder);
     expect(amount1).toBe(1);
 
     await shallPass(transferNFTMinter(CurrentAdmin, NewAdmin));
-    await shallRevert(mintRandomTunegoNfts(NftsHolder, 1, {}, CurrentAdmin));
-    await shallPass(mintRandomTunegoNfts(NftsHolder, 1, {}, NewAdmin));
+    await shallRevert(mintRandomTuneGONFT(NFTHolder, 1, {}, CurrentAdmin));
+    await shallPass(mintRandomTuneGONFT(NFTHolder, 1, {}, NewAdmin));
 
-    const [amount2] = await getTunegoNftsCollectionLength(NftsHolder);
+    const [amount2] = await getTuneGONFTCollectionLength(NFTHolder);
     expect(amount2).toBe(2);
   });
 
   it('should be possible to create new NFTMinter resource', async () => {
-    await deployTunegoNfts();
-    const NftsHolder = await getTunegoAdminAddress();
-    const CurrentAdmin = await getTunegoAdminAddress();
+    await deployTuneGONFT();
+    const NFTHolder = await getTuneGOAdminAddress();
+    const CurrentAdmin = await getTuneGOAdminAddress();
     const NewAdmin = await getAccountAddress('NewAdmin');
 
-    await setupTunegoNftsOnAccount(NftsHolder);
-    await shallPass(mintRandomTunegoNfts(NftsHolder, 1, {}, CurrentAdmin));
-    await shallRevert(mintRandomTunegoNfts(NftsHolder, 1, {}, NewAdmin));
+    await setupTuneGONFTOnAccount(NFTHolder);
+    await shallPass(mintRandomTuneGONFT(NFTHolder, 1, {}, CurrentAdmin));
+    await shallRevert(mintRandomTuneGONFT(NFTHolder, 1, {}, NewAdmin));
 
-    const [amount1] = await getTunegoNftsCollectionLength(NftsHolder);
+    const [amount1] = await getTuneGONFTCollectionLength(NFTHolder);
     expect(amount1).toBe(1);
 
     await shallPass(createNFTMinter(CurrentAdmin, NewAdmin));
-    await shallPass(mintRandomTunegoNfts(NftsHolder, 1, {}, CurrentAdmin));
-    await shallPass(mintRandomTunegoNfts(NftsHolder, 1, {}, NewAdmin));
+    await shallPass(mintRandomTuneGONFT(NFTHolder, 1, {}, CurrentAdmin));
+    await shallPass(mintRandomTuneGONFT(NFTHolder, 1, {}, NewAdmin));
 
-    const [amount2] = await getTunegoNftsCollectionLength(NftsHolder);
+    const [amount2] = await getTuneGONFTCollectionLength(NFTHolder);
     expect(amount2).toBe(3);
   });
 });

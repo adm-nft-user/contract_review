@@ -3,14 +3,9 @@ import FungibleToken from "./FungibleToken.cdc"
 import NonFungibleToken from "./NonFungibleToken.cdc"
 import MetadataViews from "./MetadataViews.cdc"
 
-/*
-    This is TunegoNfts initial contract.
-
-    It allows:
-    - to mint NFTs
-    - to transfer NFTs
- */
-pub contract TunegoNfts: NonFungibleToken {
+// Contract
+//
+pub contract TuneGONFT: NonFungibleToken {
 
     // Events
     //
@@ -34,7 +29,7 @@ pub contract TunegoNfts: NonFungibleToken {
     pub let MinterStoragePath: StoragePath
 
     // totalSupply
-    // The total number of TunegoNfts that have been minted
+    // The total number of TuneGONFT that have been minted
     //
     pub var totalSupply: UInt64
 
@@ -127,8 +122,8 @@ pub contract TunegoNfts: NonFungibleToken {
         }
 
         pub fun totalEditions(): UInt64 {
-            return TunegoNfts.itemEditions[self.itemId] != nil
-                ? TunegoNfts.itemEditions[self.itemId]!
+            return TuneGONFT.itemEditions[self.itemId] != nil
+                ? TuneGONFT.itemEditions[self.itemId]!
                 : UInt64(0)
         }
 
@@ -166,25 +161,25 @@ pub contract TunegoNfts: NonFungibleToken {
         }
     }
 
-    // TunegoNftsCollectionPublic
+    // TuneGONFTCollectionPublic
     //
-    pub resource interface TunegoNftsCollectionPublic {
+    pub resource interface TuneGONFTCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowTunegoNft(id: UInt64): &TunegoNfts.NFT? {
+        pub fun borrowTuneGONFT(id: UInt64): &TuneGONFT.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id):
-                    "Cannot borrow TunegoNft reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow TuneGONFT reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
     // Collection
     //
-    pub resource Collection: TunegoNftsCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: TuneGONFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
 
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
@@ -197,7 +192,7 @@ pub contract TunegoNfts: NonFungibleToken {
         }
 
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @TunegoNfts.NFT
+            let token <- token as! @TuneGONFT.NFT
             let id: UInt64 = token.id
             let oldToken <- self.ownedNFTs[id] <- token
 
@@ -214,10 +209,10 @@ pub contract TunegoNfts: NonFungibleToken {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
-        pub fun borrowTunegoNft(id: UInt64): &TunegoNfts.NFT? {
+        pub fun borrowTuneGONFT(id: UInt64): &TuneGONFT.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &TunegoNfts.NFT
+                return ref as! &TuneGONFT.NFT
             } else {
                 return nil
             }
@@ -234,7 +229,7 @@ pub contract TunegoNfts: NonFungibleToken {
 
     // createEmptyCollection
     //
-    pub fun createEmptyCollection(): @TunegoNfts.Collection {
+    pub fun createEmptyCollection(): @TuneGONFT.Collection {
         return <- create Collection()
     }
 
@@ -260,11 +255,11 @@ pub contract TunegoNfts: NonFungibleToken {
             }
             assert(totalRoyaltiesPercentage <= 95.0, message: "Total royalties percentage is too high")
 
-            let totalEditions = TunegoNfts.itemEditions[itemId] != nil ? TunegoNfts.itemEditions[itemId] : UInt64(0)
+            let totalEditions = TuneGONFT.itemEditions[itemId] != nil ? TuneGONFT.itemEditions[itemId] : UInt64(0)
             let edition = totalEditions! + UInt64(1)
 
             emit Minted(
-                id: TunegoNfts.totalSupply,
+                id: TuneGONFT.totalSupply,
                 itemId: itemId,
                 collectionId: collectionId,
                 edition: edition,
@@ -273,8 +268,8 @@ pub contract TunegoNfts: NonFungibleToken {
                 additionalInfo: additionalInfo
             )
 
-			recipient.deposit(token: <-create TunegoNfts.NFT(
-                id: TunegoNfts.totalSupply,
+			recipient.deposit(token: <-create TuneGONFT.NFT(
+                id: TuneGONFT.totalSupply,
                 itemId: itemId,
                 collectionId: collectionId,
                 edition: edition,
@@ -283,8 +278,8 @@ pub contract TunegoNfts: NonFungibleToken {
                 additionalInfo: additionalInfo
             ))
 
-            TunegoNfts.itemEditions[itemId] = totalEditions! + UInt64(1)
-            TunegoNfts.totalSupply = TunegoNfts.totalSupply + UInt64(1)
+            TuneGONFT.itemEditions[itemId] = totalEditions! + UInt64(1)
+            TuneGONFT.totalSupply = TuneGONFT.totalSupply + UInt64(1)
 		}
 
         access(all) fun batchMintNFT(
@@ -316,9 +311,9 @@ pub contract TunegoNfts: NonFungibleToken {
     }
 
     init () {
-        self.CollectionStoragePath = /storage/tunegoNftsCollection004
-        self.CollectionPublicPath = /public/tunegoNftsCollection004
-        self.MinterStoragePath = /storage/tunegoNftsMinter004
+        self.CollectionStoragePath = /storage/tunegoNFTCollection
+        self.CollectionPublicPath = /public/tunegoNFTCollection
+        self.MinterStoragePath = /storage/tunegoNFTMinter
 
         self.totalSupply = 0
         self.itemEditions = {}
