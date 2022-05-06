@@ -13,14 +13,24 @@ pub contract TuneGOMarket {
     pub event ContractInitialized()
     pub event SaleOfferCreated(
         saleOfferId: UInt64,
+        saleOfferAddress: Address,
         collectibleId: UInt64,
         collectibleType: String,
         tunegoFee: MarketFee,
         royalties: [Royalty],
         price: UFix64, 
     )
-    pub event SaleOfferAccepted(saleOfferId: UInt64, buyer: Address)
-    pub event SaleOfferRemoved(saleOfferId: UInt64)
+    pub event SaleOfferAccepted(
+        saleOfferId: UInt64,
+        collectibleId: UInt64,
+        collectibleType: String,
+        buyer: Address
+    )
+    pub event SaleOfferRemoved(
+        saleOfferId: UInt64,
+        collectibleId: UInt64,
+        collectibleType: String
+    )
     pub event TuneGOMarketFeeSet(receiver: Address, percentage: UFix64)
 
     // Paths
@@ -117,7 +127,12 @@ pub contract TuneGOMarket {
 
             let nft <- self.saleItemProviderCapability.borrow()!.withdraw(withdrawID: self.collectibleId)
 
-            emit SaleOfferAccepted(saleOfferId: self.uuid, buyer: buyerCollection.address)
+            emit SaleOfferAccepted(
+                saleOfferId: self.uuid,
+                collectibleId: self.collectibleId,
+                collectibleType: self.collectibleType.identifier,
+                buyer: buyerCollection.address
+            )
 
             return <- nft
         }
@@ -223,6 +238,7 @@ pub contract TuneGOMarket {
 
             emit SaleOfferCreated(
                 saleOfferId: saleOfferId,
+                saleOfferAddress: self.owner?.address!,
                 collectibleId: collectibleId,
                 collectibleType: collectibleType.identifier,
                 tunegoFee: TuneGOMarket.TuneGOFee,
@@ -234,10 +250,13 @@ pub contract TuneGOMarket {
         }
 
         pub fun removeSaleOffer(saleOfferId: UInt64) {
-
-            emit SaleOfferRemoved(saleOfferId: saleOfferId)
-
             let saleOffer <- (self.saleOffers.remove(key: saleOfferId) ?? panic("missing SaleOffer"))
+
+            emit SaleOfferRemoved(
+                saleOfferId: saleOfferId,
+                collectibleId: saleOffer.collectibleId,
+                collectibleType: saleOffer.collectibleType.identifier
+            )
 
             destroy saleOffer
         }
